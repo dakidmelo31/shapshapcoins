@@ -1,0 +1,206 @@
+name: shapshapcoins
+description: Payment Platform
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  shared_preferences: ^2.0.8
+  fluid_bottom_nav_bar: ^1.3.0
+  sqflite: ^2.0.0+4
+  path_provider: ^2.0.5
+  lottie: ^1.2.1
+  liquid_swipe: ^2.1.1
+  barcode_widget: ^2.0.1
+  vibration: ^1.7.3
+  slider_button: ^1.0.0
+  pretty_qr_code: ^2.0.2
+  screenshot: ^1.2.3
+  image_gallery_saver: ^1.7.1
+  share_plus: ^3.0.4
+  permission_handler: ^8.2.5
+  firebase_core: ^1.7.0
+  firebase_auth: ^3.1.3
+  gooey_carousel: ^0.1.2
+  uuid: ^3.0.5
+  slimy_card:
+  intl: ^0.17.0
+  flutter_slidable: ^0.6.0
+  cloud_firestore: ^2.5.4
+  image_picker: ^0.8.4+4
+  firebase_storage: ^10.0.6
+  google_fonts: ^2.1.0
+  network_to_file_image: ^3.0.3
+  cached_network_image: ^3.1.0
+  firebase_messaging: ^10.0.9
+  overlay_support: ^1.2.1
+  flutter_local_notifications: ^9.0.2
+  firebase_analytics: ^8.3.4
+  animated_text_kit: ^4.2.1
+  qr_code_scanner: ^0.6.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^1.0.0
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter.
+flutter:
+  fonts:
+    - family: Baretta
+      fonts:
+        - asset: assets/fonts/Baretta.otf
+    - family: Monoton
+      fonts:
+        - asset: assets/fonts/Monoton-Regular.ttf
+    - family: Radish
+      fonts:
+        - asset: assets/fonts/Radish-Personal.otf
+    - family: Righteous
+      fonts:
+        - asset: assets/fonts/Righteous-Regular.ttf
+  assets:
+    - assets/fonts/
+    - assets/animation1.json
+    - assets/back.png
+    - assets/checked.json
+    - assets/curves.png
+    - assets/dollar.svg
+    - assets/download1.json
+    - assets/download2.json
+    - assets/download3.json
+    - assets/download4.json
+    - assets/ecommerce.json
+    - assets/gradient1.jpg
+    - assets/gradient2.jpg
+    - assets/gradient3.png
+    - assets/gradient4.png
+    - assets/gradient5.png
+    - assets/header.png
+    - assets/header2.png
+    - assets/image-picture.json
+    - assets/logo.png
+    - assets/mtn-bg.jpg
+    - assets/mtn-bg2.png
+    - assets/mtn-momo.svg
+    - assets/mtn.jpg
+    - assets/mtn2.png
+    - assets/nice.jpg
+    - assets/nothing1.json
+    - assets/orange-bg.jpg
+    - assets/orange-momo.svg
+    - assets/orange.png
+    - assets/orange2.jpg
+    - assets/orange3.jpg
+    - assets/pay1.png
+    - assets/pay2.png
+    - assets/payanimation.json
+    - assets/people1.jpg
+    - assets/people10.jpg
+    - assets/people11.jpg
+    - assets/people12.jpg
+    - assets/people13.jpg
+    - assets/people14.jpg
+    - assets/people15.jpg
+    - assets/people16.jpg
+    - assets/people17.jpg
+    - assets/people2.jpg
+    - assets/people3.jpg
+    - assets/people4.jpg
+    - assets/people5.jpg
+    - assets/people6.jpg
+    - assets/people7.jpg
+    - assets/people8.jpg
+    - assets/people9.jpg
+    - assets/phone-bg.jpg
+    - assets/profile_holder.png
+    - assets/qrcode.json
+    - assets/receive1.jpg
+    - assets/receive2.png
+    - assets/reload.json
+    - assets/scan-bg.jpg
+    - assets/search-profile.json
+    - assets/search1.json
+    - assets/search2.json
+    - assets/send-qr-code.json
+    - assets/slogan.png
+    - assets/startscreen.png
+    - assets/transaction1.jpg
+    - assets/transaction2.jpg
+    - assets/uba.png
+    - assets/upload1.json
+    - assets/verify1.gif
+    - assets/verify2.gif
+    - assets/verify3.gif
+    - assets/verify4.gif
+    - assets/white-bg1.jpg
+    - assets/white-bg2.jpg
+    - assets/white-bg3.jpg
+    - assets/white-bg4.jpg
+    - assets/white-bg5.jpg
+    - assets/white-bg6.jpg
+    - assets/white-bg7.jpg
+    - assets/
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+
+  #   - images/a_dot_ham.jpeg
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/assets-and-images/#resolution-aware.
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/assets-and-images/#from-packages
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+

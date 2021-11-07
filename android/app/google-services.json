@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "924662968049",
+    "project_id": "shapshapcoins",
+    "storage_bucket": "shapshapcoins.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:924662968049:android:e0f002fd629af92d7a8350",
+        "android_client_info": {
+          "package_name": "com.shapshap237.shapshapcoins"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "924662968049-lipqv8htqdsgh95bug1ioqapg7lphd8k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAh-XlA44Sqr9gpQFWJ4HfoKiToI6c5Mqk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "924662968049-lipqv8htqdsgh95bug1ioqapg7lphd8k.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "924662968049-m6tvmia2vg3kv45lojcldra1fhcukrah.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.shapshap237.shapshapcoins"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
