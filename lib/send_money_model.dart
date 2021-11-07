@@ -81,192 +81,198 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
             boxHeight = deviceHeight * .6;
         }
         Color themeColor = const Color.fromRGBO(47, 27, 87, 1);
-        themeColor = Colors.white;
-        return Container(
-            color: Colors.amber,
-            height: boxHeight * .86,
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Form(
-                key: _formKey,
+        return Form(
+            key: _formKey,
+            child: Container(
+                width: double.infinity,
+                height: boxHeight,
+                color: Colors.white,
+              child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 12),
                 child: Column(
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                        Material(
-                            color: Colors.white.withOpacity(0),
-                            elevation: 40,
-                            shadowColor: Colors.black.withOpacity(0.6),
-                            child: TextFormField(
-                                controller: numberController,
-                                validator: (value){
-                                    print("input is $value");
-                                    print("user phone number is: " + auth.currentUser!.phoneNumber.toString());
 
-                                    int num = int.parse(value.toString());
-                                    if(value!.length >9 || value.length < 9 || num > 699999999 || num < 611111111){
-                                        numberController.clear();
-                                        return "The number you entered is invalid.";
-                                    }
-                                    String p = auth.currentUser!.phoneNumber.toString();
-                                    if(p.contains(value.toString())){
-                                        numberController.clear();
-                                        return "You can't send money to yourself.";
-                                    }
-
-                                    if( value.isEmpty ){
-                                        return "You need a number for the transfer.";
-
-                                    }
-                                    return null;
-                                },
-                                decoration: const InputDecoration(
-                                    enabledBorder:  OutlineInputBorder(
-                                        borderSide:  BorderSide(
-                                            color: Colors.white, width: 0.0
-                                        ),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(45)
-                                        ),
-                                    ),
-                                    focusedBorder:  OutlineInputBorder(
-                                        borderSide:  BorderSide(
-                                            color: Colors.white, width: 0.0
-                                        ),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(25)
-                                        ),
-                                    ),
-                                    disabledBorder:  OutlineInputBorder(
-                                        borderSide:  BorderSide(
-                                            color: Colors.white, width: 0.0
-                                        ),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(25)
-                                        ),
-
-                                    ),
-
-                                    prefixIcon: Icon(Icons.person_search, color: Color.fromRGBO(47, 27, 87, 1),),
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(25)
-                                        ),
-                                        borderSide: BorderSide(
-                                            color: Colors.white, width: 3.0
-                                        )
-                                    ),
-                                    fillColor: Colors.white,
-                                    filled: true,
-                                    focusColor: Color.fromRGBO(47, 27, 87, 1),
-                                    hoverColor: Colors.grey,
-                                    hintStyle: TextStyle(color: Color.fromRGBO(0,0,0,0.4)),
-                                    hintText: "Recipient Number",
-                                ),
-                                textInputAction: TextInputAction.next,
-                                keyboardType: TextInputType.phone,
-                            ),
+                        SizedBox(
+                            height: boxHeight * .12,
+                            child: Text("About the recipient", style: TextStyle(color: themeColor, fontSize: 20, fontWeight: FontWeight.w700)),
                         ),
-                        const SizedBox(
-                            height: 10,
-                        ),
-                        Material(
-                            color: Colors.white.withOpacity(0),
-                            elevation: 40,
-                            shadowColor: Colors.black.withOpacity(0.6),
-                            child: TextFormField(
-                                controller: reasonController,
-                                validator: (value){
-                                    if(value == null || value.isEmpty){
-                                        reason = value;
-                                    }
-                                    return null;
-                                },
-                                decoration: const InputDecoration(
-                                    enabledBorder:  OutlineInputBorder(
-                                        borderSide:  BorderSide(
-                                            color: Colors.white, width: 0.0
-                                        ),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(15)
-                                        ),
-                                    ),
-                                    focusedBorder:  OutlineInputBorder(
-                                        borderSide:  BorderSide(
-                                            color: Colors.white, width: 0.0
-                                        ),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(1)
-                                        ),
-                                    ),
-                                    disabledBorder:  OutlineInputBorder(
-                                        borderSide:  BorderSide(
-                                            color: Colors.white, width: 0.0
-                                        ),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(1)
-                                        ),
+                        SizedBox(
+                            height: boxHeight * .12,
+                          child: Material(
+                              color: Colors.white.withOpacity(0),
+                              elevation: 40,
+                              child: TextFormField(
+                                  controller: numberController,
+                                  validator: (value){
+                                      print("input is $value");
+                                      print("user phone number is: " + auth.currentUser!.phoneNumber.toString());
 
-                                    ),
+                                      int num = int.parse(value.toString());
+                                      if(value!.length >9 || value.length < 9 || num > 699999999 || num < 611111111){
+                                          numberController.clear();
+                                          return "The number you entered is invalid.";
+                                      }
+                                      String p = auth.currentUser!.phoneNumber.toString();
+                                      if(p.contains(value.toString())){
+                                          numberController.clear();
+                                          return "You can't send money to yourself.";
+                                      }
 
-                                    prefixIcon: Icon(Icons.message, color: Color.fromRGBO(47, 27, 87, 1),),
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(1)
-                                        ),
-                                        borderSide: BorderSide(
-                                            color: Colors.white, width: 3.0
-                                        )
-                                    ),
-                                    fillColor: Colors.white,
-                                    filled: true,
-                                    focusColor: Color.fromRGBO(47, 27, 87, 1),
-                                    hoverColor: Colors.grey,
-                                    hintStyle: TextStyle(color: Color.fromRGBO(0,0,0,0.4)),
-                                    hintText: "Reason (optional)",
-                                    contentPadding: EdgeInsets.only(top: 15)
-                                ),
-                                textInputAction: TextInputAction.done,
-                                keyboardType: TextInputType.multiline,
-                                maxLines: 3,
-                            ),
+                                      if( value.isEmpty ){
+                                          return "You need a number for the transfer.";
+
+                                      }
+                                      return null;
+                                  },
+                                  decoration: const InputDecoration(
+                                      enabledBorder:  OutlineInputBorder(
+                                          borderSide:  BorderSide(
+                                              color: Colors.white, width: 0.0
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(45)
+                                          ),
+                                      ),
+                                      focusedBorder:  OutlineInputBorder(
+                                          borderSide:  BorderSide(
+                                              color: Colors.white, width: 0.0
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(25)
+                                          ),
+                                      ),
+                                      disabledBorder:  OutlineInputBorder(
+                                          borderSide:  BorderSide(
+                                              color: Colors.white, width: 0.0
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(25)
+                                          ),
+
+                                      ),
+
+                                      prefixIcon: Icon(Icons.person_search, color: Color.fromRGBO(47, 27, 87, 1),),
+                                      border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(25)
+                                          ),
+                                          borderSide: BorderSide(
+                                              color: Colors.white, width: 3.0
+                                          )
+                                      ),
+                                      fillColor: Colors.white,
+                                      filled: true,
+                                      focusColor: Color.fromRGBO(47, 27, 87, 1),
+                                      hoverColor: Colors.grey,
+                                      hintStyle: TextStyle(color: Color.fromRGBO(0,0,0,0.4)),
+                                      hintText: "Recipient Number",
+                                  ),
+                                  textInputAction: TextInputAction.next,
+                                  keyboardType: TextInputType.phone,
+                              ),
+                          ),
+                        ),
+                        SizedBox(
+                            height: boxHeight * .31,
+                          child: Material(
+                              color: Colors.white.withOpacity(0),
+                              elevation: 40,
+                              child: TextFormField(
+                                  controller: reasonController,
+                                  validator: (value){
+                                      if(value == null || value.isEmpty){
+                                          reason = value;
+                                      }
+                                      return null;
+                                  },
+                                  decoration: const InputDecoration(
+                                      enabledBorder:  OutlineInputBorder(
+                                          borderSide:  BorderSide(
+                                              color: Colors.white, width: 0.0
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(15)
+                                          ),
+                                      ),
+                                      focusedBorder:  OutlineInputBorder(
+                                          borderSide:  BorderSide(
+                                              color: Colors.white, width: 0.0
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(1)
+                                          ),
+                                      ),
+                                      disabledBorder:  OutlineInputBorder(
+                                          borderSide:  BorderSide(
+                                              color: Colors.white, width: 0.0
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(1)
+                                          ),
+
+                                      ),
+
+                                      prefixIcon: Icon(Icons.message, color: Color.fromRGBO(47, 27, 87, 1),),
+                                      border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(1)
+                                          ),
+                                          borderSide: BorderSide(
+                                              color: Colors.white, width: 3.0
+                                          )
+                                      ),
+                                      fillColor: Colors.white,
+                                      filled: true,
+                                      focusColor: Color.fromRGBO(47, 27, 87, 1),
+                                      hoverColor: Colors.grey,
+                                      hintStyle: TextStyle(color: Color.fromRGBO(0,0,0,0.4)),
+                                      hintText: "Reason (optional)",
+                                      contentPadding: EdgeInsets.only(top: 15)
+                                  ),
+                                  textInputAction: TextInputAction.done,
+                                  keyboardType: TextInputType.multiline,
+                                  maxLines: 5,
+                              ),
+                          ),
                         ),
 
-                        const SizedBox(
-                            height: 20,
-                        ),
-                        Card(
-                            elevation: 35,
-                            // color: Color.fromRGBO(47, 27, 87, 1),
-                            color: Color.fromRGBO(47, 27, 86, 1),
-                            shadowColor: Colors.black.withOpacity(0.5),
-                            margin: const EdgeInsets.symmetric(horizontal: 20),
-                            child: InkWell(
-                                onTap: (){
-                                    if(_formKey.currentState!.validate()){
-                                        markNumber( int.parse(numberController.text));
-                                    }
-                                },
-                                child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 15),
-                                    child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                            Text("Proceed to pay", style: TextStyle(fontSize: 16, color: themeColor),),
-                                            const Padding(
-                                                padding: EdgeInsets.only(left: 16),
-                                            ),
-                                            Icon(Icons.person_search_outlined, color: themeColor, size: 16,)
-                                        ],
-                                    ),
-                                ),
-                            ),
+                        SizedBox(
+                            height: boxHeight * .12,
+                            child: Card(
+                              elevation: 35,
+                              // color: Color.fromRGBO(47, 27, 87, 1),
+                              color: Color.fromRGBO(47, 27, 86, 1),
+                              margin: const EdgeInsets.symmetric(horizontal: 20),
+                              child: InkWell(
+                                  onTap: (){
+                                      if(_formKey.currentState!.validate()){
+                                          markNumber( int.parse(numberController.text));
+                                      }
+                                  },
+                                  child: Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 15),
+                                      child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                              Text("Proceed to pay", style: TextStyle(fontSize: 16, color: Colors.white),),
+                                              const Padding(
+                                                  padding: EdgeInsets.only(left: 16),
+                                              ),
+                                              Icon(Icons.person_search_outlined, color: themeColor, size: 16,)
+                                          ],
+                                      ),
+                                  ),
+                              ),
+                          ),
                         )
-
                     ],
                 ),
+              ),
             ),
         );
     }
@@ -283,153 +289,13 @@ class ScanCode extends StatefulWidget {
 
 class _ScanCodeState extends State<ScanCode> {
     final qrKey = GlobalKey(debugLabel: "QR");
-    String da  = "Xoz4yeivfTWhA8aSyi0B8AZ0zlh1";
-    String de  = "yy0sBlQ1VXaEZC8tor2YhWEIESg2";
 
     Barcode? result;
     Widget? qrviewer;
     bool switchViewer = false;
     TextEditingController reasonController = TextEditingController();
     String? reason;
-    Widget qrViewer(var qrKey, Barcode? res){
-        String codeValue = res == null ? "" : res.code.toString();
-        if(codeValue.length == 28 )
-            {
-                print("can proceed with qr code");
-            }
-        else{
-            print("QR Code not what we expected");
-            print("it's length is ${codeValue.length}");
-        }
-        Color themeColor = Color.fromRGBO(47, 27, 87, 1);
-        return switchViewer ? Container(
-            margin: EdgeInsets.symmetric(horizontal: 10),
-            width: double.infinity,
-            height: double.infinity,
-            child: Column(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-                Text("What's your reason for sending?", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700 , color: Color.fromRGBO(47, 27, 86, 1)),),
-                Material(
-                    elevation: 40,
-                    shadowColor: Colors.black.withOpacity(0.6),
-                    child: TextFormField(
-                        controller: reasonController,
-                        validator: (value){
-                            if(value == null || value.isEmpty){
-                                reason = value;
-                                return "This reason is not valid";
-                            }
-                            return null;
-                        },
-                        decoration: const InputDecoration(
-                            enabledBorder:  OutlineInputBorder(
-                                borderSide:  BorderSide(
-                                    color: Colors.white, width: 0.0
-                                ),
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(15)
-                                ),
-                            ),
-                            focusedBorder:  OutlineInputBorder(
-                                borderSide:  BorderSide(
-                                    color: Colors.white, width: 0.0
-                                ),
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(1)
-                                ),
-                            ),
-                            disabledBorder:  OutlineInputBorder(
-                                borderSide:  BorderSide(
-                                    color: Colors.white, width: 0.0
-                                ),
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(1)
-                                ),
-
-                            ),
-
-                            prefixIcon: Icon(Icons.message, color: Color.fromRGBO(47, 27, 87, 1),),
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(1)
-                                ),
-                                borderSide: BorderSide(
-                                    color: Colors.white, width: 3.0
-                                )
-                            ),
-                            fillColor: Colors.white,
-                            filled: true,
-                            focusColor: Color.fromRGBO(47, 27, 87, 1),
-                            hoverColor: Colors.grey,
-                            hintStyle: TextStyle(color: Color.fromRGBO(0,0,0,0.4)),
-                            hintText: "Reason (optional)",
-                            contentPadding: EdgeInsets.only(top: 15)
-                        ),
-                        textInputAction: TextInputAction.done,
-                        keyboardType: TextInputType.multiline,
-                        maxLines: 8,
-                    ),
-                    color: Colors.white.withOpacity(0),
-                ),
-                SizedBox(
-                    height: 8,
-                ),
-                Card(
-                    color: Colors.grey,
-
-                  child: Expanded(
-                    child: InkWell(
-                        highlightColor: Colors.greenAccent.withOpacity(0.2),
-                        splashColor: themeColor,
-                        hoverColor: Colors.amber,
-                        onTap: () async{
-                            print("button pressed");
-                            Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-                            final prefs = await _prefs;
-                            prefs.setString("recipientUID", codeValue);
-                            print("user with ID: $codeValue has been chosen for the payment.");
-                            prefs.setString("reason", reasonController.text);
-                            Navigator.pushNamed(context, EnterAmount.routeName);
-                            print("done with the number screen.");
-                        },
-                        child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                    Text("Proceed to pay", style: TextStyle(fontSize: 16, color: Colors.white),),
-                                    const Padding(
-                                        padding: EdgeInsets.only(left: 16),
-                                    ),
-                                    Icon(Icons.person_search_outlined, color: Colors.white, size: 16,)
-                                ],
-                            ),
-                        ),
-                    ),
-                  ),
-                )
-
-            ],
-        )) : QRView(
-            key: qrKey,
-            cameraFacing: CameraFacing.back,
-            onQRViewCreated: _onQRViewCreated,
-            overlay: QrScannerOverlayShape(
-                borderColor: Colors.amber,
-                overlayColor: Color.fromRGBO(47, 27, 86, 1).withOpacity(0.5),
-                borderWidth: 10,
-                borderRadius: 8,
-                cutOutWidth: 170,
-                cutOutHeight: 170,
-                borderLength: 2,
-            ),
-        );
-    }
+    Color themeColor = const Color.fromRGBO(47, 27, 87, 1);
     QRViewController? qrController;
   @override
   void reassemble(){
@@ -443,22 +309,185 @@ class _ScanCodeState extends State<ScanCode> {
   
   @override
   Widget build(BuildContext context) {
-      return Scaffold(
-          body: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                  Expanded(
-                      flex: 5,
-                      child: qrViewer(qrKey, result),
-                  ),
+      Widget qrViewer(var qrKey, Barcode? res){
+          double deviceHeight = MediaQuery.of(context).size.height;
+          String codeValue = res == null ? "" : res.code.toString();
+          if(codeValue.length == 28 )
+          {
+              print("can proceed with qr code");
+          }
+          else{
+              print("QR Code not what we expected");
+              print("it's length is ${codeValue.length}");
+          }
+          return switchViewer ? Container(
+              margin: const EdgeInsets.symmetric(horizontal: 10),
+              width: double.infinity,
+              height: double.infinity,
+              color: Colors.blue,
+              child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                      Text("What's your reason for sending?", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700 , color: Color.fromRGBO(47, 27, 86, 1)),),
+                      Material(
+                          elevation: 40,
+                          child: TextFormField(
+                              controller: reasonController,
+                              validator: (value){
+                                  if(value == null || value.isEmpty){
+                                      reason = value;
+                                      return "This reason is not valid";
+                                  }
+                                  return null;
+                              },
+                              decoration: const InputDecoration(
+                                  enabledBorder:  OutlineInputBorder(
+                                      borderSide:  BorderSide(
+                                          color: Colors.white, width: 0.0
+                                      ),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(15)
+                                      ),
+                                  ),
+                                  focusedBorder:  OutlineInputBorder(
+                                      borderSide:  BorderSide(
+                                          color: Colors.white, width: 0.0
+                                      ),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(1)
+                                      ),
+                                  ),
+                                  disabledBorder:  OutlineInputBorder(
+                                      borderSide:  BorderSide(
+                                          color: Colors.white, width: 0.0
+                                      ),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(1)
+                                      ),
 
-                          // child: (result != null)
-                          //     ? Text(
-                          //     'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
-                          //     : Text('Scan a code'),
-              ],
+                                  ),
+
+                                  prefixIcon: Icon(Icons.message, color: Color.fromRGBO(47, 27, 87, 1),),
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(1)
+                                      ),
+                                      borderSide: BorderSide(
+                                          color: Colors.white, width: 3.0
+                                      )
+                                  ),
+                                  fillColor: Colors.white,
+                                  filled: true,
+                                  focusColor: Color.fromRGBO(47, 27, 87, 1),
+                                  hoverColor: Colors.grey,
+                                  hintStyle: TextStyle(color: Color.fromRGBO(0,0,0,0.4)),
+                                  hintText: "Reason (optional)",
+                                  contentPadding: EdgeInsets.only(top: 15)
+                              ),
+                              textInputAction: TextInputAction.done,
+                              keyboardType: TextInputType.multiline,
+                              maxLines: 8,
+                          ),
+                      ),
+
+                      Card(
+                          color: Colors.white,
+                          child: Expanded(
+                              child: InkWell(
+                                  highlightColor: Colors.greenAccent.withOpacity(0.2),
+                                  splashColor: themeColor,
+                                  hoverColor: Colors.amber,
+                                  onTap: () async{
+                                      print("button pressed");
+                                      Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+                                      final prefs = await _prefs;
+                                      prefs.setString("recipientUID", codeValue);
+                                      print("user with ID: $codeValue has been chosen for the payment.");
+                                      prefs.setString("reason", reasonController.text);
+                                      Navigator.pushNamed(context, EnterAmount.routeName);
+                                      print("done with the number screen.");
+                                  },
+                                  child: Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 15),
+                                      child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: const [
+                                              Text("Proceed to pay", style: TextStyle(fontSize: 16, color: Colors.white),),
+                                               Padding(
+                                                  padding: EdgeInsets.only(left: 16),
+                                              ),
+                                              Icon(Icons.person_search_outlined, color: Colors.white, size: 16,)
+                                          ],
+                                      ),
+                                  ),
+                              ),
+                          ),
+                      )
+
+                  ],
+              )) : Container(
+              color: Colors.amberAccent,
+              height: deviceHeight * .9,
+              width: double.infinity,
+              child: Flex(
+                  direction: Axis.vertical,
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                    Expanded(
+                    flex: 1,
+                  child: QRView(
+                      key: qrKey,
+                      cameraFacing: CameraFacing.back,
+                      onQRViewCreated: _onQRViewCreated,
+                      overlay: QrScannerOverlayShape(
+                          borderColor: Colors.pink,
+                          overlayColor: Color.fromRGBO(47, 27, 86, 1).withOpacity(0.5),
+                          borderWidth: 3,
+                          borderRadius: 8,
+                          cutOutWidth: 200,
+                          cutOutHeight: 200,
+                          borderLength: 35,
+
+                      ),
+                  ),
+                ),]
+              ),
+          );
+      }
+
+      return Scaffold(
+          body: Flex(
+              direction: Axis.vertical,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+                Expanded(
+                    flex: 1,
+                    child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                            Expanded(
+                                flex: 5,
+                                child: qrViewer(qrKey, result),
+                            ),
+
+                            // child: (result != null)
+                            //     ? Text(
+                            //     'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
+                            //     : Text('Scan a code'),
+                        ],
+                    ),
+                )
+            ],
           ),
       );
   }

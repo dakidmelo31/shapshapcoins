@@ -56,16 +56,18 @@ class _SendFundsState extends State<SendFunds> {
 
         });
     }
-    bool showContacts = false;
+    bool showContacts = true;
+    double animatedHeight = 0;
+    bool contactList = true;
     @override
     Widget build(BuildContext context) {
         double deviceHeight= MediaQuery.of(context).size.height;
+        animatedHeight = contactList? deviceHeight *.9 * .24 *.7 * .9: 0;
         Color themeColor = const Color.fromRGBO(47, 27, 86, 1);
         showContacts = deviceHeight > 599? true : false;
 
         final Widget chooseFromContacts = showContacts? AnimatedContainer(
             duration: Duration(microseconds: 300),
-            color: Colors.grey.withOpacity(0.12),
             height: deviceHeight *.9 * .24,
           child: Column(
               children: [
@@ -85,7 +87,12 @@ class _SendFundsState extends State<SendFunds> {
                                   padding: const  EdgeInsets.only(right: 4),
                                   child:IconButton(
                                       icon:  const Icon(Icons.person_add_alt, size: 20, color: Colors.grey,),
-                                      onPressed: (){},
+                                      onPressed: (){
+                                          setState(() {
+                                            showContacts = !showContacts;
+                                            contactList  = !contactList;
+                                          });
+                                      },
                                       splashColor: Colors.purple,
                                       focusColor: Colors.purple,
                                       highlightColor: Colors.purple,
@@ -94,7 +101,8 @@ class _SendFundsState extends State<SendFunds> {
                           ],
                       ),
                   ),
-                  Container(
+                  AnimatedContainer(
+                      duration: Duration(microseconds: 2300),
                       height: deviceHeight *.9 * .24 *.7,
                       child: FutureBuilder<List<HistoryItem>>(
                           future: DatabaseHelper.instance.allHistory(),
@@ -120,49 +128,64 @@ class _SendFundsState extends State<SendFunds> {
                                                   mainAxisAlignment: MainAxisAlignment.start,
                                                   crossAxisAlignment: CrossAxisAlignment.center,
                                                   children: [
-                                                      Container(
-                                                        height: deviceHeight *.9 * .24 *.7 * .9,
+                                                      AnimatedContainer(
+                                                        duration: Duration(microseconds: 300),
+                                                        height: animatedHeight,
                                                         width: 70,
                                                         margin: EdgeInsets.only(right: 5),
-                                                        color: Colors.white.withOpacity(0.5),
-                                                        child: SizedBox(
-                                                            height: double.infinity,
-                                                          width: double.infinity,
-                                                          child: InkWell(
-                                                              onTap: (){
-                                                              },
-                                                              splashColor: Colors.amberAccent,
-                                                              highlightColor: themeColor.withOpacity(0.4),
-                                                              child: Column(
-                                                                  mainAxisSize: MainAxisSize.min,
-                                                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                                  children: [
-                                                                      Padding(
-                                                                          padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 5),
-                                                                          child: ClipOval(
-                                                                              child: Hero(
-                                                                                  tag: "hero",
-                                                                                  child: Image.asset(tx.avatar, width: 40, height: 40, fit: BoxFit.cover,),
-                                                                              ),
-                                                                          ),
-                                                                      ),
-                                                                      Column(
-                                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                                          mainAxisSize: MainAxisSize.min,
-                                                                          children: [
-                                                                              Text(
-                                                                                  tx.name.length > 8? tx.name.substring(0, tx.name.indexOf(" ")) : tx.name,
-                                                                                  style: const TextStyle(
-                                                                                      color: Colors.black,
-                                                                                      fontWeight: FontWeight.w400,
-                                                                                      fontSize: 12,
-                                                                                  )
-                                                                              ),
-                                                                          ],
-                                                                      ),
-                                                                  ],
-                                                              ),
-                                                          ),
+                                                        decoration: BoxDecoration(
+                                                            color: Colors.white,
+                                                            boxShadow: [
+                                                                BoxShadow(
+                                                                    color: Colors.black.withOpacity(.04),
+                                                                    blurRadius: 1,
+                                                                    spreadRadius: 8
+                                                                )
+                                                            ]
+                                                        ),
+                                                        child: LayoutBuilder(
+                                                            builder: ((context, constraints) {
+                                                                return SizedBox(
+                                                                    height: constraints.maxHeight - 25,
+                                                                    width: constraints.biggest.height - 15,
+                                                                    child: InkWell(
+                                                                        onTap: (){
+                                                                            print("user selected for the transfer");
+                                                                        },
+                                                                        splashColor: Colors.amberAccent,
+                                                                        highlightColor: themeColor.withOpacity(0.4),
+                                                                        child: Column(
+                                                                            mainAxisSize: MainAxisSize.min,
+                                                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                                            children: [
+                                                                                Padding(
+                                                                                    padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 5),
+                                                                                    child: ClipOval(
+                                                                                        child: Hero(
+                                                                                            tag: "hero",
+                                                                                            child: Image.asset(tx.avatar, width: 65, height: 65, fit: BoxFit.cover,),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                                Column(
+                                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                    mainAxisSize: MainAxisSize.min,
+                                                                                    children: [
+                                                                                        Text(
+                                                                                            tx.name.length > 8? tx.name.substring(0, tx.name.indexOf(" ")) : tx.name,
+                                                                                            style: const TextStyle(
+                                                                                                color: Colors.black,
+                                                                                                fontWeight: FontWeight.w400,
+                                                                                                fontSize: 12,
+                                                                                            )
+                                                                                        ),
+                                                                                    ],
+                                                                                ),
+                                                                            ],
+                                                                        ),
+                                                                    ),
+                                                                );
+                                                            }),
                                                         ),
                                                       ),
                                                   ],
@@ -205,7 +228,7 @@ class _SendFundsState extends State<SendFunds> {
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
                                         Container(
-                                            color: Colors.red,
+                                            color: Colors.white,
                                         height: (deviceHeight * .90) * .08,
                                           child: Center(
                                             child: Text("Transfer Money".toUpperCase(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: themeColor),),
@@ -233,7 +256,7 @@ class _SendFundsState extends State<SendFunds> {
                         pinned: true,
                         floating: true,
                         elevation: 20,
-                        expandedHeight: 130,
+                        expandedHeight: deviceHeight * .1,
                         shadowColor: themeColor.withOpacity(0.7),
                         flexibleSpace: FlexibleSpaceBar(
                             background: Opacity(
