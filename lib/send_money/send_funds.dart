@@ -69,135 +69,135 @@ class _SendFundsState extends State<SendFunds> {
         final Widget chooseFromContacts = showContacts? AnimatedContainer(
             duration: Duration(microseconds: 300),
             height: deviceHeight *.9 * .24,
-          child: Column(
-              children: [
-                  Container(
-                      height: deviceHeight *.9 * .24 *.3,
-                      child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                              const Padding(
-                                  padding: EdgeInsets.only(left: 4),
-                                  child: Text("Choose from your contacts", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w300),),
-                              ),
+            child: Column(
+                children: [
+                    Container(
+                        height: deviceHeight *.9 * .24 *.3,
+                        child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                                const Padding(
+                                    padding: EdgeInsets.only(left: 4),
+                                    child: Text("Choose from your contacts", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w300),),
+                                ),
 
-                              Padding(
-                                  padding: const  EdgeInsets.only(right: 4),
-                                  child:IconButton(
-                                      icon:  const Icon(Icons.person_add_alt, size: 20, color: Colors.grey,),
-                                      onPressed: (){
-                                          setState(() {
-                                            showContacts = !showContacts;
-                                            contactList  = !contactList;
-                                          });
-                                      },
-                                      splashColor: Colors.purple,
-                                      focusColor: Colors.purple,
-                                      highlightColor: Colors.purple,
-                                  ),
-                              ),
-                          ],
-                      ),
-                  ),
-                  AnimatedContainer(
-                      duration: Duration(microseconds: 2300),
-                      height: deviceHeight *.9 * .24 *.7,
-                      child: FutureBuilder<List<HistoryItem>>(
-                          future: DatabaseHelper.instance.allHistory(),
-                          builder: (BuildContext context, AsyncSnapshot<List<HistoryItem>> snapshot) {
-                              if(!snapshot.hasData){
-                                  return Center(child: Lottie.asset("assets/search2.json",  height: 350, fit: BoxFit.contain,),);
-                              }
-                              else{
-                                  return snapshot.data!.isEmpty? Center( child:
-                                          Text("No transactions yet", style: TextStyle(color: Colors.grey.withOpacity(0.7)
-                                            )
-                                          ),
-                                  ) :
-                                  ListView(
-                                      scrollDirection: Axis.horizontal,
-                                      shrinkWrap: true,
-                                      children: snapshot.data!.map((tx) {
+                                Padding(
+                                    padding: const  EdgeInsets.only(right: 4),
+                                    child:IconButton(
+                                        icon:  const Icon(Icons.person_add_alt, size: 20, color: Colors.grey,),
+                                        onPressed: (){
+                                            setState(() {
+                                                showContacts = !showContacts;
+                                                contactList  = !contactList;
+                                            });
+                                        },
+                                        splashColor: Colors.purple,
+                                        focusColor: Colors.purple,
+                                        highlightColor: Colors.purple,
+                                    ),
+                                ),
+                            ],
+                        ),
+                    ),
+                    AnimatedContainer(
+                        duration: Duration(microseconds: 2300),
+                        height: deviceHeight *.9 * .24 *.7,
+                        child: FutureBuilder<List<HistoryItem>>(
+                            future: DatabaseHelper.instance.allHistory(),
+                            builder: (BuildContext context, AsyncSnapshot<List<HistoryItem>> snapshot) {
+                                if(!snapshot.hasData){
+                                    return Center(child: Lottie.asset("assets/search2.json",  height: 350, fit: BoxFit.contain,),);
+                                }
+                                else{
+                                    return snapshot.data!.isEmpty? Center( child:
+                                    Text("No transactions yet", style: TextStyle(color: Colors.grey.withOpacity(0.7)
+                                    )
+                                    ),
+                                    ) :
+                                    ListView(
+                                        scrollDirection: Axis.horizontal,
+                                        shrinkWrap: true,
+                                        children: snapshot.data!.map((tx) {
 
-                                          var transactionTime = DateFormat().add_yMMMMEEEEd().format(DateTime.now());
-                                          return
-                                              Row(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  mainAxisAlignment: MainAxisAlignment.start,
-                                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                                  children: [
-                                                      AnimatedContainer(
-                                                        duration: Duration(microseconds: 300),
-                                                        height: animatedHeight,
-                                                        width: 70,
-                                                        margin: EdgeInsets.only(right: 5),
-                                                        decoration: BoxDecoration(
-                                                            color: Colors.white,
-                                                            boxShadow: [
-                                                                BoxShadow(
-                                                                    color: Colors.black.withOpacity(.04),
-                                                                    blurRadius: 1,
-                                                                    spreadRadius: 8
-                                                                )
-                                                            ]
-                                                        ),
-                                                        child: LayoutBuilder(
-                                                            builder: ((context, constraints) {
-                                                                return SizedBox(
-                                                                    height: constraints.maxHeight - 25,
-                                                                    width: constraints.biggest.height - 15,
-                                                                    child: InkWell(
-                                                                        onTap: (){
-                                                                            print("user selected for the transfer");
-                                                                        },
-                                                                        splashColor: Colors.amberAccent,
-                                                                        highlightColor: themeColor.withOpacity(0.4),
-                                                                        child: Column(
-                                                                            mainAxisSize: MainAxisSize.min,
-                                                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                                            children: [
-                                                                                Padding(
-                                                                                    padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 5),
-                                                                                    child: ClipOval(
-                                                                                        child: Hero(
-                                                                                            tag: "hero",
-                                                                                            child: Image.asset(tx.avatar, width: 65, height: 65, fit: BoxFit.cover,),
+                                            var transactionTime = DateFormat().add_yMMMMEEEEd().format(DateTime.now());
+                                            return
+                                                Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                        AnimatedContainer(
+                                                            duration: Duration(microseconds: 300),
+                                                            height: animatedHeight,
+                                                            width: 70,
+                                                            margin: EdgeInsets.only(right: 5),
+                                                            decoration: BoxDecoration(
+                                                                color: Colors.white,
+                                                                boxShadow: [
+                                                                    BoxShadow(
+                                                                        color: Colors.black.withOpacity(.04),
+                                                                        blurRadius: 1,
+                                                                        spreadRadius: 8
+                                                                    )
+                                                                ]
+                                                            ),
+                                                            child: LayoutBuilder(
+                                                                builder: ((context, constraints) {
+                                                                    return SizedBox(
+                                                                        height: constraints.maxHeight - 25,
+                                                                        width: constraints.biggest.height - 15,
+                                                                        child: InkWell(
+                                                                            onTap: (){
+                                                                                print("user selected for the transfer");
+                                                                            },
+                                                                            splashColor: Colors.amberAccent,
+                                                                            highlightColor: themeColor.withOpacity(0.4),
+                                                                            child: Column(
+                                                                                mainAxisSize: MainAxisSize.min,
+                                                                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                                                children: [
+                                                                                    Padding(
+                                                                                        padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 5),
+                                                                                        child: ClipOval(
+                                                                                            child: Hero(
+                                                                                                tag: "hero",
+                                                                                                child: Image.asset(tx.avatar, width: 65, height: 65, fit: BoxFit.cover,),
+                                                                                            ),
                                                                                         ),
                                                                                     ),
-                                                                                ),
-                                                                                Column(
-                                                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                    mainAxisSize: MainAxisSize.min,
-                                                                                    children: [
-                                                                                        Text(
-                                                                                            tx.name.length > 8? tx.name.substring(0, tx.name.indexOf(" ")) : tx.name,
-                                                                                            style: const TextStyle(
-                                                                                                color: Colors.black,
-                                                                                                fontWeight: FontWeight.w400,
-                                                                                                fontSize: 12,
-                                                                                            )
-                                                                                        ),
-                                                                                    ],
-                                                                                ),
-                                                                            ],
+                                                                                    Column(
+                                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                        mainAxisSize: MainAxisSize.min,
+                                                                                        children: [
+                                                                                            Text(
+                                                                                                tx.name.length > 8? tx.name.substring(0, tx.name.indexOf(" ")) : tx.name,
+                                                                                                style: const TextStyle(
+                                                                                                    color: Colors.black,
+                                                                                                    fontWeight: FontWeight.w400,
+                                                                                                    fontSize: 12,
+                                                                                                )
+                                                                                            ),
+                                                                                        ],
+                                                                                    ),
+                                                                                ],
+                                                                            ),
                                                                         ),
-                                                                    ),
-                                                                );
-                                                            }),
+                                                                    );
+                                                                }),
+                                                            ),
                                                         ),
-                                                      ),
-                                                  ],
-                                              );
-                                      }).toList(),
-                                  );
-                              }
-                          },
-                      )
-                  ),
-              ],
-          ),
+                                                    ],
+                                                );
+                                        }).toList(),
+                                    );
+                                }
+                            },
+                        )
+                    ),
+                ],
+            ),
         ): Container();
 
 
@@ -229,10 +229,10 @@ class _SendFundsState extends State<SendFunds> {
                                     children: [
                                         Container(
                                             color: Colors.white,
-                                        height: (deviceHeight * .90) * .08,
-                                          child: Center(
-                                            child: Text("Transfer Money".toUpperCase(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: themeColor),),
-                                          ),
+                                            height: (deviceHeight * .90) * .08,
+                                            child: Center(
+                                                child: Text("Transfer Money".toUpperCase(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: themeColor),),
+                                            ),
                                         ),
                                         chooseFromContacts,
                                         _Usage,

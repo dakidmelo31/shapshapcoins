@@ -297,6 +297,7 @@ class _ScanCodeState extends State<ScanCode> {
     String? reason;
     Color themeColor = const Color.fromRGBO(47, 27, 87, 1);
     QRViewController? qrController;
+
   @override
   void reassemble(){
       if(Platform.isIOS){
@@ -306,10 +307,15 @@ class _ScanCodeState extends State<ScanCode> {
           qrController!.resumeCamera();
       }
   }
-  
+  Future setController() async{
+      await qrController!.toggleFlash();
+      await qrController!.flipCamera();
+      await qrController!.stopCamera();
+  }
   @override
   Widget build(BuildContext context) {
-      Widget qrViewer(var qrKey, Barcode? res){
+      qrViewer(var qrKey, Barcode? res) {
+          setController();
           double deviceHeight = MediaQuery.of(context).size.height;
           String codeValue = res == null ? "" : res.code.toString();
           if(codeValue.length == 28 )
@@ -321,10 +327,9 @@ class _ScanCodeState extends State<ScanCode> {
               print("it's length is ${codeValue.length}");
           }
           return switchViewer ? Container(
-              margin: const EdgeInsets.symmetric(horizontal: 10),
               width: double.infinity,
-              height: double.infinity,
-              color: Colors.blue,
+              height: deviceHeight,
+              color: Colors.red,
               child: Column(
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -429,7 +434,8 @@ class _ScanCodeState extends State<ScanCode> {
                       )
 
                   ],
-              )) : Container(
+              )) :
+          Container(
               color: Colors.amberAccent,
               height: deviceHeight * .9,
               width: double.infinity,
@@ -461,35 +467,7 @@ class _ScanCodeState extends State<ScanCode> {
           );
       }
 
-      return Scaffold(
-          body: Flex(
-              direction: Axis.vertical,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-                Expanded(
-                    flex: 1,
-                    child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                            Expanded(
-                                flex: 5,
-                                child: qrViewer(qrKey, result),
-                            ),
-
-                            // child: (result != null)
-                            //     ? Text(
-                            //     'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
-                            //     : Text('Scan a code'),
-                        ],
-                    ),
-                )
-            ],
-          ),
-      );
+      return qrViewer(qrKey, result);
   }
 
   void _onQRViewCreated(QRViewController qrController) async{
