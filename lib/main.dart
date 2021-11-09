@@ -1,7 +1,5 @@
 // ignore_for_file: prefer_const_constructors, prefer_void_to_null, non_constant_identifier_names, avoid_print
 
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -11,6 +9,7 @@ import 'package:shapshapcoins/signup.dart';
 
 import 'add_name.dart';
 import 'push_notifications.dart';
+import 'scan_qr_code.dart';
 import 'send_money/send_with_qr.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +18,6 @@ import 'my_contacts.dart';
 import 'receive_money/request_money.dart';
 import 'send_money/phone_number.dart';
 import 'send_money/receive_funds.dart';
-import 'receive_money/receive_money_model.dart';
 import 'security/pin_screen.dart';
 import 'send_money/qr_scan_screen.dart';
 import 'send_money/send_funds.dart';
@@ -167,6 +165,7 @@ class _NavFrameworkState extends State {
         SentSuccessfully.routeName: (context) => const SentSuccessfully(),
         SendWithQR.routeName: (context) => const SendWithQR(),
         EnterAmount.routeName: (context) => const EnterAmount(),
+        JustScan.routeName: (context) => const JustScan(),
 
         QRScanScreen.routeName: (context) => const QRScanScreen(),
         TransactionHistory.routeName: (context) => TransactionHistory(),

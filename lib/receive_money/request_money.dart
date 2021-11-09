@@ -1,13 +1,19 @@
 // ignore_for_file: prefer_const_constructors, unused_local_variable, unused_element, non_constant_identifier_names
 
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../history_model.dart';
 import '../send_money_model.dart';
 import 'receive_money_model.dart';
+
+FirebaseAuth auth = FirebaseAuth.instance;
+FirebaseFirestore firestore = FirebaseFirestore.instance;
+
 
 class RequestMoney extends StatefulWidget {
     static const routeName = "/requestMoney";
@@ -19,6 +25,10 @@ class RequestMoney extends StatefulWidget {
 }
 
 class _RequestMoneyState extends State<RequestMoney> {
+    dynamic reason = "";
+    final _formKey = GlobalKey<FormState>();
+    TextEditingController numberController = TextEditingController();
+    TextEditingController reasonController = TextEditingController();
     int switchUsage = 0;
     Widget _Usage = RequestMoneyForm();
 
@@ -32,7 +42,7 @@ class _RequestMoneyState extends State<RequestMoney> {
     void _changeView() {
         setState(() {
             if(switchUsage == 0){
-                _Usage = Container(
+                _Usage = SizedBox(
                     height: 300,
                     width: double.infinity,
                     child: ShowCode(),
@@ -61,200 +71,375 @@ class _RequestMoneyState extends State<RequestMoney> {
 
     @override
     Widget build(BuildContext context) {
-
         double deviceHeight= MediaQuery.of(context).size.height;
         Color themeColor = const Color.fromRGBO(47, 27, 86, 1);
-        return Scaffold(
-            backgroundColor: Theme.of(context).primaryColor,
-            body: CustomScrollView(
-                slivers: [
-                    SliverList(delegate: SliverChildListDelegate(
-                        [
-                            Container(
-                                padding: const  EdgeInsets.symmetric(horizontal: 8),
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(20),
-                                    boxShadow:[
-                                        BoxShadow(
-                                            color: themeColor.withOpacity(0.5),
-                                            spreadRadius: 10,
-                                            blurRadius: 10,
-                                        ),
-                                    ]
-                                ),
-                                child: Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                        _Usage,
-                                        Padding(
-                                            padding: EdgeInsets.only( top: 36),
-                                        ),
-                                        SizedBox(
-                                            height: 15,
-                                        ),
-                                        Padding(
-                                            padding: EdgeInsets.only(top: 20),
-                                            child: Text("Sender should scan this code", style: TextStyle(color: Colors.red, fontSize: 15)),
-                                        ),
-                                        TextLiquidFill(
-                                            text: "Alternatively",
-                                            waveColor: Colors.pink,
-                                            boxBackgroundColor: Colors.white,
-                                            textStyle: TextStyle(
-                                                fontSize: 41.0,
-                                                fontWeight: FontWeight.bold,
-                                            ),
-                                            boxHeight: 100.0,
-                                        ),
-                                        Row(
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
 
-                                                const Padding(
-                                                    padding: EdgeInsets.only(left: 15),
-                                                    child: Text("Choose from your contacts", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w300),),
-                                                ),
+        String recipientNumber = "";
+        Widget? _currentScreen;
+        Future<void> setValues(int recipient) async{
+            Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+            final prefs = await _prefs;
+            prefs.setInt("recipient", recipient);
+            print("$recipient has been selected for the send");
+            prefs.setString("reason", reasonController.text);
+            // Navigator.pushNamed(context, EnterAmount.routeName);
+            final userReason = reason.toString();
+        }
 
-                                                Padding(
-                                                    padding: const  EdgeInsets.only(right: 15),
-                                                    child:IconButton(
-                                                        icon:  const Icon(Icons.person_add_alt, size: 20, color: Colors.grey,),
-                                                        onPressed: (){},
-                                                        splashColor: Colors.purple,
-                                                        focusColor: Colors.purple,
-                                                        highlightColor: Colors.purple,
-                                                    ),
-                                                ),
-                                            ],
+
+        markNumber(int recipient) async{
+
+            recipientNumber = "+237$recipient";
+            print(recipientNumber);
+            var result = await firestore.collection("users").where("phone", isEqualTo: recipientNumber).get();
+            if(result.size > 0){
+                setValues(recipient);
+
+                print("found a user");
+
+                numberController.clear();
+            }
+            else{
+                print("User not found.");
+                setState(() {
+                    _currentScreen;
+                });
+            }
+
+        }
+
+        Widget formContainer = Container(
+            width: double.infinity,
+            height: deviceHeight * .9 * .57,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Form(
+                key: _formKey,
+                child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                        SizedBox(
+                            height: deviceHeight * .9 * .57 * .2,
+                            child: Center(
+                              child: Row(
+                                children: [
+                                  IconButton(
+                                      onPressed:(){
+                                          Navigator.of(context).pop();
+                                      },
+                                      icon: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Icon(Icons.arrow_back, color: themeColor)),),
+                                  Center(
+                                      child: Text("Request Money", style: TextStyle(color: Color.fromRGBO(47, 27, 87, 1), fontSize: deviceHeight * .9 * .57 * .07, fontWeight: FontWeight.w500),)),
+
+                                ],
+                              ),
+                            )),
+                        Material(
+                            color: Colors.white.withOpacity(0),
+                            elevation: 40,
+                            shadowColor: Colors.black.withOpacity(0.6),
+                            child: TextFormField(
+                                controller: numberController,
+                                validator: (value){
+                                    print("input is $value");
+                                    print("user phone number is: " + auth.currentUser!.phoneNumber.toString());
+
+                                    int num = int.parse(value.toString());
+                                    if(value!.length >9 || value.length < 9 || num > 699999999 || num < 611111111){
+                                        numberController.clear();
+                                        return "The number you entered is invalid.";
+                                    }
+                                    String p = auth.currentUser!.phoneNumber.toString();
+                                    if(p.contains(value.toString())){
+                                        numberController.clear();
+                                        return "You can't send money to yourself.";
+                                    }
+
+                                    if( value.isEmpty ){
+                                        return "You need a number for the transfer.";
+
+                                    }
+                                    return null;
+                                },
+                                decoration: const InputDecoration(
+                                    enabledBorder:  OutlineInputBorder(
+                                        borderSide:  BorderSide(
+                                            color: Colors.white, width: 0.0
                                         ),
-                                        Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: Padding(
-                                                padding: EdgeInsets.only(left: 10),
-                                                child: SizedBox(
-                                                    height: 100,
-                                                    child: FutureBuilder<List<HistoryItem>>(
-                                                        future: DatabaseHelper.instance.allHistory(),
-                                                        builder: (BuildContext context, AsyncSnapshot<List<HistoryItem>> snapshot) {
-                                                            if(!snapshot.hasData){
-                                                                return Center(child: Padding(
-                                                                    padding: EdgeInsets.only(top: 108),
-                                                                    child: Lottie.asset("assets/search2.json",  height: 350, fit: BoxFit.contain,),
-                                                                ),);
-                                                            }
-                                                            else{
-                                                                return snapshot.data!.isEmpty? Center( child: Padding(
-                                                                    padding: EdgeInsets.only(top: 108),
-                                                                    child:  ListView(
-                                                                        scrollDirection: Axis.horizontal,
-                                                                        shrinkWrap: false,
-                                                                        children: [
-                                                                            Text("No transactions yet", style: TextStyle(color: Colors.grey.withOpacity(0.7))),
-                                                                            Lottie.asset("assets/nothing1.json", height: 350, fit: BoxFit.contain,),
-
-                                                                        ],
-                                                                    ),
-                                                                ),) :
-                                                                ListView(
-                                                                    scrollDirection: Axis.horizontal,
-                                                                    shrinkWrap: true,
-                                                                    children: snapshot.data!.map((tx) {
-
-                                                                        var transactionTime = DateFormat().add_yMMMMEEEEd().format(DateTime.now());
-                                                                        return
-                                                                            Row(
-                                                                                mainAxisSize: MainAxisSize.min,
-                                                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                                                children: [
-                                                                                    Card(
-                                                                                        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                                                                        elevation: 20,
-                                                                                        shadowColor: Colors.black12,
-                                                                                        child: InkWell(
-                                                                                            onTap: (){
-                                                                                            },
-                                                                                            child: Column(
-                                                                                                mainAxisSize: MainAxisSize.min,
-                                                                                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                                                                children: [
-                                                                                                    Padding(
-                                                                                                        padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 5),
-                                                                                                        child: ClipOval(
-                                                                                                            child: Hero(
-                                                                                                                tag: "hero",
-                                                                                                                child: Image.asset(tx.avatar, width: 40, height: 40, fit: BoxFit.cover,),
-                                                                                                            ),
-                                                                                                        ),
-                                                                                                    ),
-                                                                                                    Column(
-                                                                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                                        mainAxisSize: MainAxisSize.min,
-                                                                                                        children: [
-                                                                                                            Text(
-                                                                                                                tx.name.length > 8? tx.name.substring(0, tx.name.indexOf(" ")) : tx.name,
-                                                                                                                style: const TextStyle(
-                                                                                                                    color: Colors.black,
-                                                                                                                    fontWeight: FontWeight.w400,
-                                                                                                                    fontSize: 12,
-                                                                                                                )
-                                                                                                            ),
-                                                                                                        ],
-                                                                                                    ),
-                                                                                                ],
-                                                                                            ),
-                                                                                        ),
-                                                                                    ),
-                                                                                ],
-                                                                            );
-                                                                    }).toList(),
-                                                                );
-                                                            }
-                                                        },
-                                                    )
-                                                ),
-                                            ),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(45)
                                         ),
-                                        const SizedBox(
-                                            height: 100,
+                                    ),
+                                    focusedBorder:  OutlineInputBorder(
+                                        borderSide:  BorderSide(
+                                            color: Colors.white, width: 0.0
+                                        ),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(25)
+                                        ),
+                                    ),
+                                    disabledBorder:  OutlineInputBorder(
+                                        borderSide:  BorderSide(
+                                            color: Colors.white, width: 0.0
+                                        ),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(25)
+                                        ),
+
+                                    ),
+
+                                    prefixIcon: Icon(Icons.person_search, color: Color.fromRGBO(47, 27, 87, 1),),
+                                    border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(25)
+                                        ),
+                                        borderSide: BorderSide(
+                                            color: Colors.white, width: 3.0
                                         )
-
-                                    ],
-
+                                    ),
+                                    fillColor: Colors.white,
+                                    filled: true,
+                                    focusColor: Color.fromRGBO(47, 27, 87, 1),
+                                    hoverColor: Colors.grey,
+                                    hintStyle: TextStyle(color: Color.fromRGBO(0,0,0,0.4)),
+                                    hintText: "Recipient Number",
                                 ),
-                            ),
-                        ]
-                    )),
-
-
-                    SliverAppBar(
-
-                        actions: [
-                            IconButton(onPressed: (){
-                                print("switch to qr code scanner");
-                                _changeView();
-                            }, icon: const Icon(Icons.qr_code))
-                        ],
-                        backgroundColor: themeColor,
-                        pinned: true,
-                        floating: true,
-                        elevation: 20,
-                        expandedHeight: 130,
-                        shadowColor: themeColor.withOpacity(0.7),
-                        flexibleSpace: FlexibleSpaceBar(
-                            background: Opacity(
-                                opacity: 0.25,
-                                child: Image.asset("assets/curves.png", fit: BoxFit.contain, width: 60, alignment: Alignment.topRight,),
+                                textInputAction: TextInputAction.next,
+                                keyboardType: TextInputType.phone,
                             ),
                         ),
-                    ),
+                        Material(
+                            color: Colors.white.withOpacity(0),
+                            elevation: 40,
+                            shadowColor: Colors.black.withOpacity(0.6),
+                            child: TextFormField(
+                                controller: reasonController,
+                                validator: (value){
+                                    if(value == null || value.isEmpty){
+                                        reason = value;
+                                    }
+                                    return null;
+                                },
+                                decoration: const InputDecoration(
+                                    enabledBorder:  OutlineInputBorder(
+                                        borderSide:  BorderSide(
+                                            color: Colors.white, width: 0.0
+                                        ),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(15)
+                                        ),
+                                    ),
+                                    focusedBorder:  OutlineInputBorder(
+                                        borderSide:  BorderSide(
+                                            color: Colors.white, width: 0.0
+                                        ),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(1)
+                                        ),
+                                    ),
+                                    disabledBorder:  OutlineInputBorder(
+                                        borderSide:  BorderSide(
+                                            color: Colors.white, width: 0.0
+                                        ),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(1)
+                                        ),
 
-                ],
+                                    ),
+
+                                    prefixIcon: Icon(Icons.message, color: Color.fromRGBO(47, 27, 87, 1),),
+                                    border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(1)
+                                        ),
+                                        borderSide: BorderSide(
+                                            color: Colors.white, width: 3.0
+                                        )
+                                    ),
+                                    fillColor: Colors.white,
+                                    filled: true,
+                                    focusColor: Color.fromRGBO(47, 27, 87, 1),
+                                    hoverColor: Colors.grey,
+                                    hintStyle: TextStyle(color: Color.fromRGBO(0,0,0,0.4)),
+                                    hintText: "Reason (optional)",
+                                    contentPadding: EdgeInsets.only(top: 15)
+                                ),
+                                textInputAction: TextInputAction.done,
+                                keyboardType: TextInputType.multiline,
+                                maxLines: 4,
+                            ),
+                        ),
+
+
+                        Card(
+                            elevation: 35,
+                            // color: Color.fromRGBO(47, 27, 87, 1),
+                            color: Color.fromRGBO(47, 27, 86, 1),
+                            shadowColor: Colors.green.withOpacity(0.5),
+                            margin: const EdgeInsets.symmetric(horizontal: 20),
+                            child: InkWell(
+                                onTap: (){
+                                    if(_formKey.currentState!.validate()){
+                                        markNumber( int.parse(numberController.text));
+                                    }
+                                },
+                                child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 15),
+                                    child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: const [
+                                            Text("Proceed to pay", style: TextStyle(fontSize: 16, color: Colors.white),),
+                                            Padding(
+                                                padding: EdgeInsets.only(left: 16),
+                                            ),
+                                            Icon(Icons.person_search_outlined, color: Colors.white, size: 16,)
+                                        ],
+                                    ),
+                                ),
+                            ),
+                        )
+
+                    ],
+                ),
             ),
+        );
+
+        double deviceWidth =MediaQuery.of(context).size.width;
+
+        return Scaffold(
+            backgroundColor: Colors.pink, //Theme.of(context).primaryColor,
+            body:ListView(
+                children: [
+                    Container(
+                        height: deviceHeight * .9,
+                        padding: const  EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20)),
+                            boxShadow:[
+                                BoxShadow(
+                                    color: themeColor.withOpacity(0.5),
+                                    spreadRadius: 10,
+                                    blurRadius: 10,
+                                ),
+                            ]
+                        ),
+                        child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                                formContainer,
+                                TextLiquidFill(
+                                    text: "Or Pick from friends List",
+                                    waveColor: Colors.pink,
+                                    boxBackgroundColor: Colors.white,
+                                    textStyle: TextStyle(
+                                        fontSize: deviceWidth * .9 * .06,
+                                        fontWeight: FontWeight.bold,
+                                    ),
+                                    boxHeight: deviceHeight * .9 * .15,
+                                ),
+                                SizedBox(
+                                  width: deviceWidth,
+                                  height: deviceHeight * .9 * .2,
+                                  child: Padding(
+                                      padding: EdgeInsets.only(left: 10),
+                                      child: FutureBuilder<List<HistoryItem>>(
+                                          future: DatabaseHelper.instance.allHistory(),
+                                          builder: (BuildContext context, AsyncSnapshot<List<HistoryItem>> snapshot) {
+                                              if(!snapshot.hasData){
+                                                  return Center(child: Lottie.asset("assets/search2.json",  height: 350, fit: BoxFit.contain,),);
+                                              }
+                                              else{
+                                                  return snapshot.data!.isEmpty? Text("No transactions yet", style: TextStyle(color: Colors.grey.withOpacity(0.7))) :
+                                                  ListView(
+                                                      scrollDirection: Axis.horizontal,
+                                                      shrinkWrap: true,
+                                                      children: snapshot.data!.map((tx) {
+                                                          return
+                                                              Row(
+                                                                  mainAxisSize: MainAxisSize.min,
+                                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                                  children: [
+                                                                      Card(
+                                                                          margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                                                          elevation: 20,
+                                                                          shadowColor: Colors.black12,
+                                                                          child: InkWell(
+                                                                              onTap: (){
+                                                                              },
+                                                                              child: Column(
+                                                                                  mainAxisSize: MainAxisSize.min,
+                                                                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                                                  children: [
+                                                                                      Padding(
+                                                                                          padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 5),
+                                                                                          child: ClipOval(
+                                                                                              child: Hero(
+                                                                                                  tag: "hero",
+                                                                                                  child: Image.asset(
+                                                                                                      tx.avatar,
+                                                                                                      width:  (deviceHeight * .9 * .15) - 5,
+                                                                                                      height: (deviceHeight * .9 * .15) - 5,
+                                                                                                      fit: BoxFit.cover,),
+                                                                                              ),
+                                                                                          ),
+                                                                                      ),
+                                                                                      Column(
+                                                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                          mainAxisSize: MainAxisSize.min,
+                                                                                          children: [
+                                                                                              Text(
+                                                                                                  tx.name.length > 8? tx.name.substring(0, tx.name.indexOf(" ")) : tx.name,
+                                                                                                  style: const TextStyle(
+                                                                                                      color: Colors.black,
+                                                                                                      fontWeight: FontWeight.w400,
+                                                                                                      fontSize: 12,
+                                                                                                  )
+                                                                                              ),
+                                                                                          ],
+                                                                                      ),
+                                                                                  ],
+                                                                              ),
+                                                                          ),
+                                                                      ),
+                                                                  ],
+                                                              );
+                                                      }).toList(),
+                                                  );
+                                              }
+                                          },
+                                      ),
+                                  ),
+                                ),
+                            ],
+
+                        ),
+                    ),
+                    Container(
+                        height: deviceHeight * .1,
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                image: AssetImage("assets/curves.png",),
+                                fit: BoxFit.contain,
+                                alignment: Alignment.topRight,
+                            )
+                        ),
+                        child: Center(
+                            child: TextButton.icon(onPressed: (){}, icon: Icon(Icons.qr_code, color: Colors.white,), label: Text("Show Your Code Instead", style: TextStyle( color: Colors.white)),),
+                        ),
+                    ),
+                ],
+            )
         );
     }
 }
