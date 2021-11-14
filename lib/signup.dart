@@ -3,6 +3,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_countdown_timer/countdown_controller.dart';
+import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
+import 'package:flutter_countdown_timer/current_remaining_time.dart';
+import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:shapshapcoins/add_name.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'main_account.dart';
@@ -50,9 +55,11 @@ class _SignupState extends State<Signup> {
 
     await auth.verifyPhoneNumber(
       phoneNumber: number,
-      timeout: const Duration(seconds: 60),
+      timeout: const Duration(seconds: 70),
       codeAutoRetrievalTimeout: (String verificationId) {
         setState(() {
+          debugPrint("verification ID is: $verificationId");
+          debugPrint("Verification Code is: $verificationCode");
           verificationCode = verificationId;
         },);
       },
@@ -60,7 +67,6 @@ class _SignupState extends State<Signup> {
         // ANDROID ONLY!
         // Sign the user in (or link) with the auto-generated credential
         await auth.signInWithCredential(credential).then((value) async => {
-
           if(value != null){
             print("user is logged in \n user is  $value"),
             await _firestore.collection("users").doc(auth.currentUser!.uid).set({
@@ -117,9 +123,14 @@ class _SignupState extends State<Signup> {
   }
   final _codeController = TextEditingController();
 bool isOTP = false;
+  bool hideResend = false;
   @override
   Widget build(BuildContext context) {
+int endTime =  DateTime.now().millisecondsSinceEpoch +
+    Duration(seconds: 70).inMilliseconds;
+CountdownTimerController countdownTimerController = CountdownTimerController(endTime: endTime, onEnd: (){debugPrint("timer ended");});
     Color themeColor = Theme.of(context).primaryColor;
+
     if (isOTP) {
       return Scaffold(
       backgroundColor: themeColor,
@@ -181,6 +192,30 @@ bool isOTP = false;
                           child:   Text(
                             "Enter the OTP sent to your number.", style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 16, fontWeight: FontWeight.w300),),
                         ),
+                        CountdownTimer(
+                          endTime: 270,
+                          textStyle: TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
+                          onEnd: (){
+                            debugPrint("countdown has ended");
+                            setState(() {
+                              hideResend = !hideResend;
+                            });
+                          },
+                          widgetBuilder: (_, CurrentRemainingTime? time){
+                            if(time == null){
+                              return  TextButton(onPressed: () async{
+                                auth.signInWithPhoneNumber("+237" + phoneController.text.toString());
+                              }, child: Text("Resend Code"),);
+                            }
+                            int seconds = (time.min == null? 0 : time.min! * 60) + (time.sec == null? 0 : time.sec!);
+                            return Text("${seconds}s till next retry is available", style: TextStyle(color: Colors.white),);
+                          },
+                          controller: countdownTimerController,
+                        ),
+                        hideResend? TextButton(onPressed: () async{
+                          auth.signInWithPhoneNumber("+237" + phoneController.text.toString());
+                        }, child: Text("Resend Code"),): SizedBox(height: 0, width: 0)
+
                       ],
                     ),
                     Column(
@@ -273,14 +308,15 @@ bool isOTP = false;
                                       if(value != null){
                                         await _firestore.collection("users").doc(auth.currentUser!.uid)
                                             .set({
-                                          "name": "",
                                           'phone': "+237 " + phoneController.text.toString(),
                                             }, SetOptions(merge: true)).then((value) => {
-                                        Navigator.of(context).popUntil(ModalRoute.withName(MainAccount.routeName))
+                                        Navigator.pushNamed(context, AddName.routeName)// User has been registered
                                         })
                                       }
                                     }).catchError((onError) =>{
-                                      print("Error was found ${onError.toString()}")
+                                      debugPrint("Error was found ${onError.toString()}")
+                                    }).then((value) => {
+                                      debugPrint("ended")
                                     });
 
                                   }
@@ -328,7 +364,7 @@ bool isOTP = false;
       ),
     );
     } else {
-      return WillPopScope(child: Scaffold(
+      return Scaffold(
       backgroundColor: themeColor,
       body: ListView(
         children: [
@@ -513,7 +549,7 @@ bool isOTP = false;
           )
         ],
       ),
-    ), onWillPop: () async => false);
+    );
     }
   }
 }

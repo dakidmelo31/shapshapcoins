@@ -5,22 +5,27 @@ import 'dart:io';
 import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shapshapcoins/receive_money/request_money.dart';
+import 'package:shapshapcoins/send_money/qr_send.dart';
 
 import 'my_points.dart';
 import 'receive_money/receive_money_model.dart';
-import 'scan_qr_code.dart';
 
 import 'send_money/send_funds.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'my_contacts.dart';
 
+import 'settings/app_settings.dart';
 import 'signup.dart';
 
 FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -36,13 +41,103 @@ class MainAccount extends StatefulWidget {
 }
 
 class _MainAccountState extends State<MainAccount> {
+
+  _userInfo() async{
+    Stream userDocument = _firestore.collection("users").doc(auth.currentUser!.uid).snapshots();
+
+  }
+  XFile? image;
+  Dio dio = Dio();
+  bool loading = false;
+
+  Future<bool> saveLocally(String url, String filename) async{
+    Directory? dir;
+    try{
+      if(Platform.isAndroid){
+        if( await Permission.storage.isGranted){
+          dir = await getExternalStorageDirectory();
+          debugPrint("directory path is: " + dir!.path);
+          String newPath = "";
+          int? tmp;
+          newPath = dir.path.split("/Android")[0];
+          newPath = newPath + "/ShapshapCoins";
+          dir = Directory(newPath);
+          debugPrint(dir.path);
+
+        }
+
+      }
+      else{
+        if(await Permission.photos.isGranted){
+          dir = await getTemporaryDirectory();
+        }
+
+      }
+      if(!await dir!.exists()){
+        await dir.create(recursive: true);
+      }
+      if(await dir.exists()){
+        debugPrint("reached this place");
+        File saveImg = File(dir.path +"/$filename");
+        final prefs = await SharedPreferences.getInstance();
+        await dio.download(url, saveImg.path, onReceiveProgress: (currentSize, totalSize){
+          setState(() {
+            prefs.setString("avatarPhoto", saveImg.path);
+            debugPrint("avatar photo location saved to shared preferences");
+          });
+
+        }).then((value) {
+          setState(() {
+            debugPrint("show user profile path " + saveImg.path);
+            avatarPhoto = Image.file(File(saveImg.path), fit: BoxFit.cover, width: 40, height: 40,);
+          });
+
+        });
+        if(Platform.isIOS){
+          await ImageGallerySaver.saveFile(saveImg.path, isReturnPathOfIOS: true);
+        }
+        return true;
+      }
+
+
+    } catch(e){
+      print("error met: " + e.toString());
+    }
+
+    return false;
+  }
+
+  downloadPicture(String url) async{
+    setState(() {
+      loading = true;
+    });
+
+    bool downloaded = await saveLocally(url, "avatar.png");
+    if(downloaded){
+      debugPrint("profile downloaded successfully");
+    }
+    else{
+      debugPrint("Error met downloading the file");
+    }
+    setState(() {
+      loading = false;
+    });
+
+  }
+
+
   _checkProfile() async{
     final prefs = await SharedPreferences.getInstance();
     if( prefs.containsKey("avatarPhoto")){
-      avatarPhoto = prefs.getString("avatarPhoto");
-      print("Your avatar is $avatarPhoto");
+      final picPath = prefs.getString("avatarPhoto");
+      print("Your avatar path is $picPath");
+setState(() {
+  avatarPhoto = Image.file(File(picPath!), fit: BoxFit.cover, width: 40, height: 40,);
+});    }
+    else{
+      downloadPicture('https://firebasestorage.googleapis.com/v0/b/shapshapcoins.appspot.com/o/kid-geb536f5ae_640.png?alt=media&token=da3aeaee-a4dc-4ff8-a07d-29f3b9b7cc55');
     }
-    avatarPhoto = null;
+
   }
 
   final Stream<QuerySnapshot> _usersStream = FirebaseFirestore.instance
@@ -60,11 +155,12 @@ class _MainAccountState extends State<MainAccount> {
   var currentBalance = 0;
   FirebaseAuth _user = FirebaseAuth.instance;
 
-  String? avatarPhoto;
+  Widget? avatarPhoto;
   Widget? balance = CircularProgressIndicator();
 
   _getUserInfo() async {
     User? user = auth.currentUser;
+
     _firestore
         .collection("users")
         .doc(user!.uid)
@@ -81,9 +177,9 @@ class _MainAccountState extends State<MainAccount> {
                 customPattern: '#,### \u00a4')
                 .format(userData.data()!["balance"]),
             style: TextStyle(
-              fontSize: amount > 99999? 40: 25,
+              fontSize: amount < 99999? 40: 25,
               color: Colors.white,
-              fontWeight: amount > 99999? FontWeight.w700 : FontWeight.w300
+              fontWeight: amount < 99999? FontWeight.w700 : FontWeight.w300
             ),
           );
 
@@ -97,10 +193,6 @@ class _MainAccountState extends State<MainAccount> {
     return File(pathName);
   }
   //profile picture
- var myProfile;
-  setProfile() async{
-    myProfile = await file("assets/people3.jpg");
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +211,7 @@ class _MainAccountState extends State<MainAccount> {
         fontSize: 16, fontWeight: FontWeight.w300, color: Colors.white);
     double deviceWidth = MediaQuery.of(context).size.width;
     Color themeColor = const Color.fromRGBO(47, 27, 86, 1);
-    return Scaffold(
+    return  Scaffold(
       body: Container(
         height: double.infinity,
         width: double.infinity,
@@ -157,27 +249,13 @@ class _MainAccountState extends State<MainAccount> {
                       },
                       child: Padding(
                         padding: EdgeInsets.only(left: 10),
-                        child: ClipOval(
-                          child: Image(
-                            image: AssetImage(avatarPhoto != null? avatarPhoto.toString() : "assets/people5.jpg"),
-                            width: 54,
-                            height: 54,
-                            fit: BoxFit.cover,
-                            alignment: Alignment.center,
+                        child: InkWell(
+                          onTap: (){
+                            Navigator.pushNamed(context, AppSettings.routeName);
+                          },
+                          child: ClipOval(
+                            child: avatarPhoto,
                           ),
-                          // child: avatarPhoto != null
-                          //     ? Image.network(
-                          //         avatarPhoto.toString(),
-                          //         fit: BoxFit.cover,
-                          //         width: 40,
-                          //         height: 40,
-                          //       )
-                          //     : Lottie.asset(
-                          //         "assets/download2.json",
-                          //         fit: BoxFit.cover,
-                          //         width: 40,
-                          //         height: 40,
-                          //       ),
                         ),
                       ),
                     ),
@@ -190,7 +268,6 @@ class _MainAccountState extends State<MainAccount> {
                         children: [
                           IconButton(
                             onPressed: () {
-                              Navigator.pushNamed(context, Signup.routeName);
                             },
                             icon: Icon(
                               Icons.notifications_outlined,
@@ -232,7 +309,7 @@ class _MainAccountState extends State<MainAccount> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
+                      children: const [
                         Padding(
                           padding: EdgeInsets.only(left: 10),
                           child: Text(
@@ -466,7 +543,7 @@ class _MainAccountState extends State<MainAccount> {
                               ],
                             ),
                           )),
-                      openBuilder: (context, _) =>JustScan(),
+                      openBuilder: (context, _) =>QRSend(),
                     ),
                   ),
                 ],

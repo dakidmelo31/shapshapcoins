@@ -3,15 +3,26 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lottie/lottie.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
-
+class MyImageCache extends ImageCache{
+  @override
+  void clear(){
+    print("clearing cache");
+    super.clear();
+  }
+}
 class AppSettings extends StatefulWidget {
   static const routeName = "/settings";
   const AppSettings({Key? key}) : super(key: key);
@@ -23,27 +34,114 @@ FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
 FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-class _AppSettingsState extends State<AppSettings> {
-  String? name, phone, avatarPhoto;
 
-//Get Profile Path
-  Future<File> file(String filename) async{
-    Directory dir = await getApplicationDocumentsDirectory();
-    String pathName = join(dir.path, filename);
-    return File(pathName);
+class _AppSettingsState extends State<AppSettings> {
+  String? name, phone;
+
+  @override
+  ImageCache createImageCache() => MyImageCache();
+
+  Widget avatarPhoto = CircularProgressIndicator.adaptive();
+  XFile? image;
+  Dio dio = Dio();
+  bool loading = false;
+  _checkProfile() async{
+    final prefs = await SharedPreferences.getInstance();
+    if( prefs.containsKey("avatarPhoto")){
+      final picPath = prefs.getString("avatarPhoto");
+      print("Your avatar path is $avatarPhoto");
+      PaintingBinding.instance!.imageCache!.clear();
+      setState(() {
+        avatarPhoto = Image.file(File(picPath!), fit: BoxFit.cover, width: 40, height: 40, alignment: Alignment.topCenter, filterQuality: FilterQuality.high, colorBlendMode: BlendMode.lighten,);
+      });    }
+    else{
+      downloadPicture('https://firebasestorage.googleapis.com/v0/b/shapshapcoins.appspot.com/o/kid-geb536f5ae_640.png?alt=media&token=da3aeaee-a4dc-4ff8-a07d-29f3b9b7cc55');
+    }
+
   }
-  //profile picture
-  var myProfile;
-  setProfile() async{
-    myProfile = await file("assets/people3.jpg");
+
+  Future<bool> saveLocally(String url, String filename) async{
+
+    Directory? dir;
+    try{
+      if(Platform.isAndroid){
+        if( await Permission.storage.isGranted){
+          dir = await getExternalStorageDirectory();
+          debugPrint("directory path is: " + dir!.path);
+          String newPath = "";
+          int? tmp;
+          newPath = dir.path.split("/Android")[0];
+          newPath = newPath + "/ShapshapCoins";
+          dir = Directory(newPath);
+          debugPrint(dir.path);
+
+        }
+
+      }
+      else{
+        if(await Permission.photos.isGranted){
+          dir = await getTemporaryDirectory();
+        }
+
+      }
+      if(!await dir!.exists()){
+        await dir.create(recursive: true);
+      }
+      if(await dir.exists()){
+        debugPrint("reached this place");
+        File saveImg = File(dir.path +"/$filename");
+        final prefs = await SharedPreferences.getInstance();
+        await dio.download(url, saveImg.path, onReceiveProgress: (currentSize, totalSize){
+          setState(() {
+            prefs.setString("avatarPhoto", saveImg.path);
+            debugPrint("avatar photo location saved to shared preferences");
+          });
+
+        }).then((value) {
+          setState(() {
+            debugPrint("show user profile path " + saveImg.path);
+            avatarPhoto = Image.file(File(saveImg.path), fit: BoxFit.cover, width: 40, height: 40,);
+          });
+
+        });
+        if(Platform.isIOS){
+          await ImageGallerySaver.saveFile(saveImg.path, isReturnPathOfIOS: true);
+        }
+        return true;
+      }
+
+
+    } catch(e){
+      print("error met: " + e.toString());
+    }
+
+    return false;
   }
+
+  downloadPicture(String url) async{
+    setState(() {
+      loading = true;
+    });
+
+    bool downloaded = await saveLocally(url, "avatar.png");
+    if(downloaded){
+      debugPrint("profile downloaded successfully");
+    }
+    else{
+      debugPrint("Error met downloading the file");
+    }
+    setState(() {
+      loading = false;
+    });
+
+  }
+
+
 
   _getUserInfo() async{
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     final prefs = await _prefs;
-    if( !prefs.containsKey("avatarPhoto")){
-      avatarPhoto = null;
-    }
+
     User? user = auth.currentUser;
     _firestore.collection("users")
         .doc(user!.uid)
@@ -53,12 +151,8 @@ class _AppSettingsState extends State<AppSettings> {
         return;
 
       setState(() {
-        phone = userData.data()!['email'];
-        name = userData.data()!['username'];
-
-        if(userData.data()!['profile'] != "avatar.png"){
-          avatarPhoto = userData.data()!['profile'];
-        }
+        phone = userData.data()!['phone'];
+        name = userData.data()!['name'];
 
       });
     });
@@ -68,6 +162,7 @@ class _AppSettingsState extends State<AppSettings> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    _checkProfile();
     _getUserInfo();
   }
 
@@ -77,8 +172,21 @@ class _AppSettingsState extends State<AppSettings> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            elevation: 30,
-            expandedHeight: 200,
+            elevation: 20,
+            snap: true,
+            systemOverlayStyle: SystemUiOverlayStyle(
+              statusBarBrightness: Brightness.dark,
+              systemNavigationBarIconBrightness: Brightness.dark,
+              statusBarIconBrightness: Brightness.dark,
+              systemNavigationBarColor: Colors.pink,
+            ),
+            automaticallyImplyLeading: true,
+            backwardsCompatibility: true,
+            centerTitle: true,
+            stretch: true,
+            excludeHeaderSemantics: true,
+            stretchTriggerOffset: 50,
+            expandedHeight: 250,
             floating: true,
             pinned: true,
             title: Text(""),
@@ -89,18 +197,27 @@ class _AppSettingsState extends State<AppSettings> {
             flexibleSpace: FlexibleSpaceBar(
               background: Hero(
                 tag: "image",
-                child: Image(
-                  image: NetworkToFileImage(
-                    file: myProfile,
-                    url: avatarPhoto != null? avatarPhoto.toString() : "https://firebasestorage.googleapis.com/v0/b/shapshapcoins.appspot.com/o/user%2Fprofile%2Fyy0sBlQ1VXaEZC8tor2YhWEIESg2?alt=media&token=805713aa-42de-4148-82fb-93730527c5cc",
-                    debug: true
-                  ),
-                  fit: BoxFit.cover,
+                child: Stack(
+                  fit: StackFit.expand,
                   alignment: Alignment.center,
-
+                  children: [
+                    avatarPhoto as Widget,
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context).primaryColor.withOpacity(0.6),
+                            Theme.of(context).primaryColor.withOpacity(0.9)
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        )
+                      ),
+                    )
+                  ],
                 ),
               ),
-              title: Text("650-981-130"),
+              title: Text(phone.toString()),
             ),
           ),
           SliverList(delegate:

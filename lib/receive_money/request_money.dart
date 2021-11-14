@@ -434,7 +434,7 @@ class _RequestMoneyState extends State<RequestMoney> {
                                 alignment: Alignment.topRight,
                             )
                         ),
-                        child: Center(
+                        child: Expanded(
                             child: TextButton.icon(onPressed: (){}, icon: Icon(Icons.qr_code, color: Colors.white,), label: Text("Show Your Code Instead", style: TextStyle( color: Colors.white)),),
                         ),
                     ),

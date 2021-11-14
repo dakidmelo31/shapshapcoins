@@ -37,6 +37,15 @@ class _LoginPinState extends State<LoginPin> {
     _pin    = "";
     Color checkedColor = Colors.white;
   }
+  void createPin(String val) async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    final SharedPreferences prefs = await _prefs;
+    prefs.setString("pin", val);
+    prefs.setString("number", "650981130");
+    print("Pin is now: " + prefs.getString("pin")!);
+
+
+  }
 
   confirmPin(String val) async {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();

@@ -3,8 +3,10 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -92,35 +94,24 @@ class _ShowCodeState extends State<ShowCode> {
 
   @override
   Widget build(BuildContext context) {
+      double deviceHeight = MediaQuery.of(context).size.width;
+      double deviceWidth  = MediaQuery.of(context).size.width;
 
       return Scaffold(
-          body: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                  Expanded(
-                      flex: 5,
-                      child: PrettyQr(
-                          elementColor: Color.fromRGBO(89, 45, 250, 1),
-                          data: auth.currentUser!.uid,
-                          roundEdges: true,
-                          typeNumber: 5,
-                          errorCorrectLevel: 3,
-                      ),
+          backgroundColor: Color.fromRGBO(47, 27, 86, 1),
+          body: Container(
+              decoration: const BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage("assets/gradient3.png"),
+                      alignment: Alignment.center,
+                      fit: BoxFit.cover,
                   ),
-
-                          // child: (result != null)
-                          //     ? Text(
-                          //     'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
-                          //     : Text('Scan a code'),
-              ],
-          ),
+              ),
+              child: Container(
+                  color: Colors.black.withOpacity(0.3)
+              )
+          )
       );
   }
 
-  @override
-  void dispose(){
-      super.dispose();
-  }
 }

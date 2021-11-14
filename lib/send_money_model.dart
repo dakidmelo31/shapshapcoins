@@ -308,24 +308,14 @@ class _ScanCodeState extends State<ScanCode> {
       }
   }
   Future setController() async{
-      await qrController!.toggleFlash();
-      await qrController!.flipCamera();
-      await qrController!.stopCamera();
   }
   @override
   Widget build(BuildContext context) {
       qrViewer(var qrKey, Barcode? res) {
           setController();
+          int codeValue = 33;
           double deviceHeight = MediaQuery.of(context).size.height;
-          String codeValue = res == null ? "" : res.code.toString();
-          if(codeValue.length == 28 )
-          {
-              print("can proceed with qr code");
-          }
-          else{
-              print("QR Code not what we expected");
-              print("it's length is ${codeValue.length}");
-          }
+
           return switchViewer ? Container(
               width: double.infinity,
               height: deviceHeight,
@@ -408,7 +398,7 @@ class _ScanCodeState extends State<ScanCode> {
                                       print("button pressed");
                                       Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
                                       final prefs = await _prefs;
-                                      prefs.setString("recipientUID", codeValue);
+                                      prefs.setString("recipientUID", codeValue.toString());
                                       print("user with ID: $codeValue has been chosen for the payment.");
                                       prefs.setString("reason", reasonController.text);
                                       Navigator.pushNamed(context, EnterAmount.routeName);
