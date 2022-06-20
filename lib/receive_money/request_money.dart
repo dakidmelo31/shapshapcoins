@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shapshapcoins/contact_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../history_model.dart';
@@ -30,7 +31,7 @@ class _RequestMoneyState extends State<RequestMoney> {
     TextEditingController numberController = TextEditingController();
     TextEditingController reasonController = TextEditingController();
     int switchUsage = 0;
-    Widget _Usage = RequestMoneyForm();
+    Widget _Usage = ScanCode();
 
 
     @override
@@ -350,14 +351,14 @@ class _RequestMoneyState extends State<RequestMoney> {
                                   height: deviceHeight * .9 * .2,
                                   child: Padding(
                                       padding: EdgeInsets.only(left: 10),
-                                      child: FutureBuilder<List<HistoryItem>>(
-                                          future: DatabaseHelper.instance.allHistory(),
-                                          builder: (BuildContext context, AsyncSnapshot<List<HistoryItem>> snapshot) {
+                                      child: FutureBuilder<List<ContactModel>>(
+                                          future: ContactDatabaseHelper.instance.allContacts(),
+                                          builder: (BuildContext context, AsyncSnapshot<List<ContactModel>> snapshot) {
                                               if(!snapshot.hasData){
                                                   return Center(child: Lottie.asset("assets/search2.json",  height: 350, fit: BoxFit.contain,),);
                                               }
                                               else{
-                                                  return snapshot.data!.isEmpty? Text("No transactions yet", style: TextStyle(color: Colors.grey.withOpacity(0.7))) :
+                                                  return snapshot.data!.isEmpty? Text("No saved users yet", style: TextStyle(color: Colors.grey.withOpacity(0.7))) :
                                                   ListView(
                                                       scrollDirection: Axis.horizontal,
                                                       shrinkWrap: true,
@@ -384,11 +385,44 @@ class _RequestMoneyState extends State<RequestMoney> {
                                                                                           child: ClipOval(
                                                                                               child: Hero(
                                                                                                   tag: "hero",
-                                                                                                  child: Image.asset(
-                                                                                                      tx.avatar,
+                                                                                                  child: Image.network(
+                                                                                                      tx.profile,
                                                                                                       width:  (deviceHeight * .9 * .15) - 5,
                                                                                                       height: (deviceHeight * .9 * .15) - 5,
-                                                                                                      fit: BoxFit.cover,),
+                                                                                                      fit: BoxFit.cover,
+        errorBuilder:
+        (BuildContext context,
+        Object exception,
+        StackTrace? stacktrace
+        ){
+        return Lottie.asset("loadingerror.gif",
+        width:  (deviceHeight * .9 * .15) - 5,
+        height: (deviceHeight * .9 * .15) - 5,
+        fit: BoxFit.contain
+        );
+
+        },
+        loadingBuilder:
+        (BuildContext context,
+        Widget child,
+        ImageChunkEvent?
+        loadingProgress) {
+            if (loadingProgress == null)
+                return child;
+            return Center(
+                child:
+                CircularProgressIndicator(
+                    value: loadingProgress
+                        .expectedTotalBytes !=
+                        null
+                        ? loadingProgress
+                        .cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                        : null,
+                ));
+        }
+        ),
+
                                                                                               ),
                                                                                           ),
                                                                                       ),
@@ -397,7 +431,9 @@ class _RequestMoneyState extends State<RequestMoney> {
                                                                                           mainAxisSize: MainAxisSize.min,
                                                                                           children: [
                                                                                               Text(
-                                                                                                  tx.name.length > 8? tx.name.substring(0, tx.name.indexOf(" ")) : tx.name,
+
+
+                                                                                                    tx.name.length > 8? tx.name.substring(0, tx.name.indexOf(" ")) : tx.name,
                                                                                                   style: const TextStyle(
                                                                                                       color: Colors.black,
                                                                                                       fontWeight: FontWeight.w400,
@@ -434,8 +470,19 @@ class _RequestMoneyState extends State<RequestMoney> {
                                 alignment: Alignment.topRight,
                             )
                         ),
-                        child: Expanded(
-                            child: TextButton.icon(onPressed: (){}, icon: Icon(Icons.qr_code, color: Colors.white,), label: Text("Show Your Code Instead", style: TextStyle( color: Colors.white)),),
+                        child: Flex(
+                          direction: Axis.vertical,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Expanded(
+                                flex: 1,
+                                child: TextButton.icon(onPressed: (){
+                                    setState(() {
+                                      switchUsage = 1;
+                                    });
+                                }, icon: Icon(Icons.qr_code, color: Colors.white,), label: Text("Show Your Code Instead", style: TextStyle( color: Colors.white)),),
+                            ),
+                          ],
                         ),
                     ),
                 ],

@@ -14,7 +14,7 @@ import '../main_account.dart';
 
 
 class SentSuccessfully extends StatefulWidget {
-  static const routeName = "/sendMoney/confirmRecipient/sentSuccessfully";
+  static const routeName = "/sentSuccessfully";
   const SentSuccessfully({Key? key}) : super(key: key);
 
   @override
@@ -62,7 +62,7 @@ class _SentSuccessfullyState extends State<SentSuccessfully> {
     final directory = await getApplicationDocumentsDirectory();
     final image     = File('${directory.path}/receipt.png');
     image.writeAsBytesSync(capturedImage);
-    
+
     await Share.shareFiles([image.path], text: "Share your Receipt");
 
   }
@@ -135,6 +135,7 @@ Future _shareReceipt() async{
 
   @override
   Widget build(BuildContext context) {
+
     const SystemUiOverlayStyle(
       statusBarColor: Colors.white,
       statusBarBrightness: Brightness.light,

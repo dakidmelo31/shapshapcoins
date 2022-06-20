@@ -175,6 +175,16 @@ class DatabaseHelper {
     return historyList;
   }
 
+  Future<List<HistoryItem>> allDistinctHistory() async {
+    Database db = await instance.database;
+
+    var history = await db.query('history', orderBy: 'name');
+    List<HistoryItem> historyList = history.isNotEmpty
+        ? history.map((c) => HistoryItem.fromMap(c)).toList()
+        : [];
+    return historyList;
+  }
+
   Future<List<HistoryItem>> selectHistory(int id) async {
     Database db = await instance.database;
 print("ID passed is $id");

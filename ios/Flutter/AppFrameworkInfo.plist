@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>en</string>
+  <key>CFBundleExecutable</key>
+  <string>App</string>
+  <key>CFBundleIdentifier</key>
+  <string>io.flutter.flutter.app</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>App</string>
+  <key>CFBundlePackageType</key>
+  <string>FMWK</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+  <key>CFBundleSignature</key>
+  <string>????</string>
+  <key>CFBundleVersion</key>
+  <string>1.0</string>
+  <key>MinimumOSVersion</key>
+  <string>9.0</string>
+  <key>NSContactsUsageDescription</key>
+  <string>This app requires contacts access to function.</string>
+  <key>NSLocationWhenInUseUsageDescription</key>
+  <string>This app requires access to your location when in use to show relevan information.</string>
+  <key>NSLocationAlwaysUsageDescription</key>
+  <string>This app requires always on access to to your location to notifiy you when are near a store.</string>
+</dict>
+</plist>

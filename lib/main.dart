@@ -61,6 +61,7 @@ Future<void> requestPermission() async{
   print('User granted permission: ${settings.authorizationStatus}');
 }
 void main() async{
+  
   WidgetsFlutterBinding.ensureInitialized();
 
   SystemChrome.setSystemUIOverlayStyle(

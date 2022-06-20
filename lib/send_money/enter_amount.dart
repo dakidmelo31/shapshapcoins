@@ -6,8 +6,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:shapshapcoins/contact_model.dart';
+import 'package:shapshapcoins/history_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:slider_button/slider_button.dart';
+
+import 'sent_successfully.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -53,7 +57,7 @@ class _EnterAmountState extends State<EnterAmount> {
               "";
         } else {
           currentAmount = currentAmount.substring(0, currentAmount.length - 1);
-          print(currentAmount);
+          debugPrint(currentAmount);
         }
       } else {
         if (currentAmount == "0.0" || currentAmount == "0") {
@@ -61,14 +65,14 @@ class _EnterAmountState extends State<EnterAmount> {
         }
 
         if (currentAmount.length >= 7) {
-          print("reduce it?? $currentAmount");
+          debugPrint("reduce it?? $currentAmount");
         } else {
           if (currentAmount == "0") {
             currentAmount = amount;
           } else {
             currentAmount += amount;
           }
-          print("keep typing $currentAmount");
+          debugPrint("keep typing $currentAmount");
 
           if (currentAmount.length > 2) {
             currentCommission = "5";
@@ -89,7 +93,7 @@ class _EnterAmountState extends State<EnterAmount> {
   var result;
 
   getNumber() async {
-    print("pass through this place");
+    debugPrint("pass through this place");
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     final prefs = await _prefs;
     userNumber = !prefs.containsKey("recipient")
@@ -99,8 +103,8 @@ class _EnterAmountState extends State<EnterAmount> {
 
     if (prefs.containsKey("recipientUID")) {
       recipientUID = prefs.getString("recipientUID").toString();
-      print("found recipient UID");
-      print("Found a number");
+      debugPrint("found recipient UID");
+      debugPrint("Found a number");
       result = await firestore
           .collection("users")
           .doc(recipientUID)
@@ -112,12 +116,12 @@ class _EnterAmountState extends State<EnterAmount> {
                       recipientName = value.data()!["name"];
                       this.recipientNumber = value.data()!["phone"];
                       userAvatar = value.data()!["profile"];
-                      print(
+                      debugPrint(
                           'user name: $recipientName, recipient number: $recipientNumber, user Avatar: $userAvatar');
                     })
                   }
                 else
-                  {print("didn't fine any user")}
+                  {debugPrint("didn't fine any user")}
               });
       prefs.remove("recipientUID");
 
@@ -133,14 +137,14 @@ class _EnterAmountState extends State<EnterAmount> {
             "+237 " + segments[0] + " - " + segments[1] + " - " + segments[2];
       });
     } else {
-      print("didn't find recipient UID so trying out phone number");
+      debugPrint("didn't find recipient UID so trying out phone number");
       result = await firestore
           .collection("users")
           .where("phone", isEqualTo: recipientNumber)
           .get();
 
       if (result.size > 0) {
-        print("Found a number");
+        debugPrint("Found a number");
         result.docs.forEach((element) {
           setState(() {
             recipientName = element.data()["name"];
@@ -149,7 +153,7 @@ class _EnterAmountState extends State<EnterAmount> {
           });
         });
       } else {
-        print("User not found.");
+        debugPrint("User not found.");
         setState(() {});
       }
 
@@ -176,6 +180,8 @@ class _EnterAmountState extends State<EnterAmount> {
     prefs.setInt("transactionFee", int.parse(currentCommission));
     prefs.setString("recipientName", recipientName!);
     prefs.setString("transactionID", "AASDKLFE33239343");
+    String? reason = prefs.getString("reason");
+    String? myName = prefs.getString("name").toString();
 
     var result = await firestore
         .collection("users")
@@ -185,7 +191,7 @@ class _EnterAmountState extends State<EnterAmount> {
 
     recipientID = result.docs.first.id;
     if (result.size > 0) {
-      print("Found a number");
+      debugPrint("Found a number");
       result.docs.forEach((element) {
         setState(() {
           recipientBalance = element.data()["balance"] + amount;
@@ -198,7 +204,34 @@ class _EnterAmountState extends State<EnterAmount> {
                 "balance": recipientBalance,
               })
               .then((value) => {
-                    print(
+                debugPrint("now i'm writing the transaction details to my account's collection"),
+               setState(() {
+                  firestore.collection("users").doc(auth.currentUser!.uid).collection("userTransactionHistory").add({
+                    "recipient": recipientName,
+                    "recipientID" : recipientID,
+                    "amount" : amount,
+                    "charges" : currentCommission,
+                    "message" : reason.toString(),
+                    "transactionTime" : FieldValue.serverTimestamp()
+                  }).whenComplete(() => {
+                    debugPrint('successfully registered user information to database, now for the user\'s own history to be created'),
+
+
+                  firestore.collection("users").doc(recipientID).collection("userTransactionHistory").add({
+                  "sender": myName,
+                  "senderID" : auth.currentUser!.uid,
+                  "amount" : amount,
+                  "message" : reason.toString(),
+                  "transactionTime" : FieldValue.serverTimestamp()
+                  }).whenComplete(() => {
+                  debugPrint('successfully registered all transaction information to database'),
+                     DatabaseHelper.instance.add(HistoryItem(name: recipientName.toString(), amount: amount.toString(), number: recipientID, message: reason.toString(), transactionTime: FieldValue.serverTimestamp().toString(), avatar: userAvatar.toString(), charges: currentCommission)),
+                    ContactDatabaseHelper.instance.add(ContactModel(name: recipientName.toString(), phone: recipientID, profile: userAvatar.toString(), imageSet: true.toString()))
+                  })
+
+                  });
+                }),
+                    debugPrint(
                         "User has been paid, we can now send SMS notification and push notifications"),
                     firestore
                         .collection("users")
@@ -207,7 +240,8 @@ class _EnterAmountState extends State<EnterAmount> {
                           "balance": newBalance,
                         })
                         .then((value) => {
-                              print(
+
+                              debugPrint(
                                   "Your own balance has been reflected now. You can continue working"),
                               firestore
                                   .collection("system")
@@ -216,35 +250,30 @@ class _EnterAmountState extends State<EnterAmount> {
                                     "balance": systemBalance + 5,
                                   })
                                   .then((value) => {
-                                        print(
+                                        debugPrint(
                                             "The system balance has been added successfully")
                                       })
-                                  .catchError((onError) => print(
+                                  .catchError((onError) => debugPrint(
                                       "failed to make payment because of the following: ${onError.toString()}"))
                             })
-                        .catchError((onError) => print(
+                        .catchError((onError) => debugPrint(
                             "failed to make payment because of the following: ${onError.toString()}"))
                   })
-              .catchError((onError) => print(
+              .catchError((onError) => debugPrint(
                   "failed to make payment because of the following: ${onError.toString()}"));
         });
       });
     } else {
-      print("User not found.");
+      debugPrint("User not found.");
       setState(() {});
     }
 
     setState(() {
-      List<String> segments = [];
-      segments.add(userNumber.substring(0, 3));
-      segments.add(userNumber.substring(3, 6));
-      segments.add(userNumber.substring(6, 9));
-      userNumber =
-          "+237 " + segments[0] + " - " + segments[1] + " - " + segments[2];
+      //Move user to the receipt screen
+      Navigator.pushNamed(context, SentSuccessfully.routeName);
     });
 
     // setState(() {
-    //     Navigator.pushNamed(context, SentSuccessfully.routeName);
     // });
   }
 
@@ -319,24 +348,50 @@ class _EnterAmountState extends State<EnterAmount> {
                 ),
               ),
               ClipOval(
-                  child: userAvatar == null? const CircularProgressIndicator( color: Colors.amber, backgroundColor: Colors.white, strokeWidth: 6,): Image.network(
-                userAvatar.toString(),
-                width: deviceHeight * .1,
-                height: deviceHeight * .1,
-                fit: BoxFit.cover,
-              )),
+                  child: Image.network(
+                          userAvatar.toString(),
+                          width: deviceHeight * .1,
+                          height: deviceHeight * .1,
+                          fit: BoxFit.cover,
+                    loadingBuilder:
+                        (BuildContext context,
+                        Widget child,
+                        ImageChunkEvent?
+                        loadingProgress) {
+                      if (loadingProgress == null)
+                        return child;
+                      return Center(
+                          child:
+                          CircularProgressIndicator(
+                            color: const Color.fromRGBO(47, 27, 86, 1),
+                            value: loadingProgress
+                                .expectedTotalBytes !=
+                                null
+                                ? loadingProgress
+                                .cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                                : null,
+                          ));
+                    },
+                  )),
               SizedBox(
                 height: deviceHeight * .06,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    recipientName == null? const LinearProgressIndicator(backgroundColor: Colors.white, color: Colors.amber, minHeight: 2,) : Text(
-                      recipientName.toString(),
-                      style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w700),
-                    ),
-
+                    recipientName == null
+                        ? const LinearProgressIndicator(
+                            backgroundColor: Colors.white,
+                            color: Colors.amber,
+                            minHeight: 2,
+                          )
+                        : Text(
+                            recipientName.toString(),
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700),
+                          ),
                     Text(
                       userNumber,
                       style: const TextStyle(
@@ -344,7 +399,6 @@ class _EnterAmountState extends State<EnterAmount> {
                           fontSize: 14,
                           fontWeight: FontWeight.w200),
                     ),
-
                   ],
                 ),
               ),
@@ -360,13 +414,13 @@ class _EnterAmountState extends State<EnterAmount> {
                     width: deviceWidth - 20,
                     height: deviceHeight * 0.08,
                     decoration: const BoxDecoration(
-                        color: Colors.transparent,
-                        border: Border(
-                            bottom: BorderSide(
+                      color: Colors.transparent,
+                      border: Border(
+                        bottom: BorderSide(
                           width: 1,
                           color: Colors.white,
                         ),
-                        ),
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
@@ -407,13 +461,26 @@ class _EnterAmountState extends State<EnterAmount> {
                     radius: 0,
                     width: double.infinity,
                     alignLabel: Alignment.center,
-                    dismissible: false,
                     action: () {
+
                       if (int.parse(currentAmount) <= realBalance) {
                         makePayment(int.parse(currentAmount));
                       } else {
-                        print(
+                        debugPrint(
                             "Cannot Confirm payment since we have a negative balance");
+                        const mySnack = SnackBar(
+                            duration: Duration(milliseconds: 1800),
+                            elevation: 20,
+                            backgroundColor: Colors.white,
+                            width: double.infinity,
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            dismissDirection: DismissDirection.horizontal,
+
+                            content: Center(
+                                child: Text(
+                                  "Sorry, your balance is smaller than the amount you are trying to pay.", style: TextStyle(color: Color.fromRGBO(47, 27, 86, 1)),)));
+                        ScaffoldMessenger.of(context).showSnackBar(mySnack);
+
                       }
                     },
                     dismissThresholds: 0.7,
@@ -436,7 +503,6 @@ class _EnterAmountState extends State<EnterAmount> {
                     height: deviceHeight * .02,
                   ),
                   SizedBox(
-
                     height: deviceHeight * .135,
                     width: deviceWidth,
                     child: Row(
@@ -577,12 +643,10 @@ class _EnterAmountState extends State<EnterAmount> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Center(
-
-                            child: TextButton(
-                              onPressed: () {},
-                              child:
-                                  const Icon(Icons.check, color: Colors.blue),
-                            ),
+                          child: TextButton(
+                            onPressed: () {},
+                            child: const Icon(Icons.check, color: Colors.blue),
+                          ),
                         ),
                         Center(
                           child: TextButton(
@@ -611,7 +675,8 @@ class _EnterAmountState extends State<EnterAmount> {
                   ),
                 ],
               ),
-            ],
+
+          ],
           ),
         ),
       ),

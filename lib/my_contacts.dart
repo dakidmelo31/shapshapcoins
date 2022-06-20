@@ -58,7 +58,7 @@ class _MyContactsState extends State<MyContacts> {
                         height: 15,
                     ),
                     FutureBuilder<List<ContactModel>>(
-                        future: DatabaseHelper.instance.getContacts(),
+                        future: ContactDatabaseHelper.instance.getContacts(),
                         builder: (BuildContext context, AsyncSnapshot<List<ContactModel>> snapshot) {
                             if(!snapshot.hasData){
                                 return Center(child: Padding(
@@ -200,7 +200,7 @@ class _AddContactState extends State<AddContact> {
                                     ),
                                         onPressed: () async{
                                             if(formKey.currentState!.validate()){
-                                                await DatabaseHelper.instance.add(ContactModel(
+                                                await ContactDatabaseHelper.instance.add(ContactModel(
                                                     phone: phone.toString(),
                                                     name: username!,
                                                     profile: "assets/people1.jpg",

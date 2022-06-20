@@ -32,9 +32,9 @@ class ContactModel {
   }
 }
 
-class DatabaseHelper {
-  DatabaseHelper._privateConstructor();
-  static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
+class ContactDatabaseHelper {
+  ContactDatabaseHelper._privateConstructor();
+  static final ContactDatabaseHelper instance = ContactDatabaseHelper._privateConstructor();
 
   static Database? _database;
   Future<Database> get database async => _database ??= await _initDatabase();
@@ -55,7 +55,7 @@ class DatabaseHelper {
           id INTEGER PRIMARY KEY,
           name TEXT,
           profile TEXT,
-          phone TEXT,
+          phone TEXT UNIQUE,
           imageSet TEXT
       )
       ''');
@@ -74,6 +74,18 @@ class DatabaseHelper {
     Database db = await instance.database;
     return await db.insert('contacts', contacts.toMap());
   }
+
+
+  Future<List<ContactModel>> allContacts() async {
+    Database db = await instance.database;
+
+    var contacts = await db.query('contacts', orderBy: 'name');
+    List<ContactModel> contactsList = contacts.isNotEmpty
+        ? contacts.map((c) => ContactModel.fromMap(c)).toList()
+        : [];
+    return contactsList;
+  }
+
 
   Future<int> remove(int id) async {
     Database db = await instance.database;

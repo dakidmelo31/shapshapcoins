@@ -41,6 +41,7 @@ class MainAccount extends StatefulWidget {
 }
 
 class _MainAccountState extends State<MainAccount> {
+  Widget  lastT = LinearProgressIndicator(backgroundColor: Colors.white, minHeight: 6,);
 
   _userInfo() async{
     Stream userDocument = _firestore.collection("users").doc(auth.currentUser!.uid).snapshots();
@@ -157,7 +158,6 @@ setState(() {
 
   Widget? avatarPhoto;
   Widget? balance = CircularProgressIndicator();
-
   _getUserInfo() async {
     User? user = auth.currentUser;
 
@@ -167,7 +167,14 @@ setState(() {
         .snapshots()
         .listen((userData) {
       if (!userData.exists) return;
-
+      Future<QuerySnapshot<Map<String, dynamic>>> lastTransaction = _firestore
+          .collection("users")
+          .doc(user.uid).collection("transactionHistory")
+          .snapshots().last;
+      if(lastTransaction != null){
+        debugPrint(lastTransaction.toString());
+        lastTransaction;
+      }
       setState(() {
         final amount = userData.data()!["balance"];
           balance = Text(
@@ -309,10 +316,10 @@ setState(() {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
+                      children: [
                         Padding(
                           padding: EdgeInsets.only(left: 10),
-                          child: Text(
+                          child: false? lastT :Text(
                             "Last Payment: 300 F",
                             style: TextStyle(fontSize: 14, color: Colors.white),
                           ),
@@ -503,7 +510,7 @@ setState(() {
                     elevation: 20,
                     child: OpenContainer(
                       closedElevation: 0,
-                      middleColor: Colors.amberAccent,
+                      middleColor: themeColor,
                       transitionDuration: Duration(seconds: 1),
                       transitionType: ContainerTransitionType.fadeThrough,
                       closedBuilder: (context, VoidCallback openContainer) => InkWell(
